@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { Hero } from "@/components/landing/Hero";
+import { Footer } from "@/components/Footer";
 
 const FEATURES = [
   {
@@ -28,7 +29,7 @@ const STEPS = [
 
 export default function Home() {
   return (
-    <main className="flex-1" style={{ background: "#FFFFFF", color: "var(--color-text)" }}>
+    <main className="flex-1">
       <div className="relative overflow-hidden">
         <HeroBackground />
         <Navbar />
@@ -41,11 +42,7 @@ export default function Home() {
         </h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-2xl p-6"
-              style={{ border: "1px solid rgba(25,40,55,0.1)", background: "var(--color-login-bg)" }}
-            >
+            <div key={f.title} className="panel rounded-2xl p-6">
               <h3 className="font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm opacity-70">{f.body}</p>
             </div>
@@ -53,23 +50,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ background: "var(--color-login-bg)" }}>
-        <div className="mx-auto max-w-5xl px-6 py-20">
-          <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
-            How it works
-          </h2>
-          <ol className="mt-8 grid gap-6 sm:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="rounded-2xl bg-white p-6" style={{ border: "1px solid rgba(25,40,55,0.1)" }}>
-                <span className="text-sm font-mono" style={{ color: "#7342E2" }}>
-                  0{i + 1}
-                </span>
-                <h3 className="mt-2 font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm opacity-70">{s.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+      <section className="mx-auto max-w-5xl px-6 py-20">
+        <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
+          How it works
+        </h2>
+        <ol className="mt-8 grid gap-6 sm:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="panel rounded-2xl p-6">
+              <span className="text-sm font-mono" style={{ color: "#7342E2" }}>
+                0{i + 1}
+              </span>
+              <h3 className="mt-2 font-semibold">{s.title}</h3>
+              <p className="mt-2 text-sm opacity-70">{s.body}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="mx-auto max-w-5xl px-6 py-20">
@@ -86,12 +81,7 @@ export default function Home() {
         </a>
       </section>
 
-      <footer className="px-6 py-8 text-sm opacity-50" style={{ borderTop: "1px solid rgba(25,40,55,0.1)" }}>
-        <div className="mx-auto max-w-5xl">
-          Zamance runs on Ethereum Sepolia with encrypted amounts via Zama FHEVM. Custody sits in
-          a Gnosis Safe multisig - Zamance can propose a payout but never move funds alone.
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

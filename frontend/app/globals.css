@@ -6,20 +6,19 @@
 }
 
 :root {
-  /* Landing page design tokens (see components/landing/*) */
   --font-heading: "Helvetica Now Display Bold", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  /* One palette, used everywhere - landing, docs, dashboard alike. */
   --color-text: #192837;
   --color-login-bg: #f2f2ee;
 
-  /* App-wide dark theme (dashboard, add-to-slack) - kept separate from the
-     landing tokens above so the two visual languages don't collide. */
-  --background: #08070c;
-  --foreground: #f4f2fb;
-  --accent: #8b5cf6;
-  --accent-soft: #a78bfa;
-  --muted: #171422;
-  --border: #241f33;
+  --background: #ffffff;
+  --foreground: #192837;
+  --accent: #7342e2;
+  --accent-soft: #9a6ee8;
+  --muted: #f2f2ee;
+  --border: rgba(25, 40, 55, 0.1);
 }
 
 @theme inline {
@@ -35,4 +34,24 @@ body {
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+  color: var(--color-text);
+}
+
+/* Shared backdrop (see components/SiteBackground.tsx): the same soft purple
+   glow the hero uses, fixed behind every page so there's one continuous
+   background instead of separate solid blocks per section/page. */
+.site-glow {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(115, 66, 226, 0.14), transparent 45%),
+    radial-gradient(circle at 85% 25%, rgba(115, 66, 226, 0.1), transparent 50%),
+    radial-gradient(circle at 50% 100%, rgba(115, 66, 226, 0.08), transparent 60%),
+    #ffffff;
+}
+
+/* Frosted panel used instead of solid-color section blocks, so content sits
+   on the shared glow rather than interrupting it. */
+.panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
 }

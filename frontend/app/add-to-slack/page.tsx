@@ -22,7 +22,7 @@ export default function AddToSlackPage() {
         <SlackButton href={SLACK_INSTALL_URL} />
       </div>
 
-      <div className="mt-16 rounded-2xl border border-border p-6 text-left">
+      <div className="panel mt-16 rounded-2xl p-6 text-left">
         <h2 className="font-semibold">Before you install, you&apos;ll need:</h2>
         <ul className="mt-4 space-y-3 text-sm text-foreground/70">
           {REQUIREMENTS.map((r) => (

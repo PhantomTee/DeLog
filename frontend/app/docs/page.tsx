@@ -51,7 +51,7 @@ export default function DocsPage() {
       <h2 className="mt-12 text-xl font-semibold">Slash commands</h2>
       <div className="mt-4 space-y-4">
         {COMMANDS.map((c) => (
-          <div key={c.cmd} className="rounded-xl p-4" style={{ border: "1px solid rgba(25,40,55,0.1)" }}>
+          <div key={c.cmd} className="panel rounded-xl p-4">
             <code className="text-sm font-semibold" style={{ color: "#7342E2" }}>
               {c.cmd}
             </code>

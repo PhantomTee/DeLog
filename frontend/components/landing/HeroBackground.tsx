@@ -20,6 +20,13 @@ export function HeroBackground() {
         loop
         playsInline
       />
+      {/* Dissolves the video into the shared site background below instead of
+          cutting off sharply at the section boundary. */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-1/2"
+        style={{ background: "linear-gradient(to bottom, transparent, #ffffff)" }}
+        aria-hidden
+      />
     </div>
   );
 }

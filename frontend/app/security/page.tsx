@@ -53,7 +53,7 @@ export default function SecurityPage() {
         ))}
       </div>
 
-      <div className="mt-12 rounded-xl p-5" style={{ background: "var(--color-login-bg)" }}>
+      <div className="panel mt-12 rounded-xl p-5">
         <p className="text-sm opacity-70">
           Found an issue? Please report it privately rather than filing a public GitHub issue -
           see the <a href="/support" className="underline">Support</a> page for how to reach us.

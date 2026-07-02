@@ -76,7 +76,7 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {error && <p className="mt-6 rounded-lg bg-red-500/10 p-4 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-6 rounded-lg bg-red-500/10 p-4 text-sm text-red-600">{error}</p>}
       {loading && <p className="mt-6 text-sm text-foreground/50">Loading...</p>}
 
       {team && (
@@ -88,7 +88,7 @@ export default function DashboardPage() {
       )}
 
       {team && !team.treasuryConfigured && (
-        <p className="mt-6 rounded-lg border border-border p-4 text-sm text-foreground/70">
+        <p className="panel mt-6 rounded-lg p-4 text-sm text-foreground/70">
           Run <code>/setup-treasury &lt;safeAddress&gt; &lt;tokenAddress&gt;</code> in Slack to
           connect your team&apos;s Safe and confidential token.
         </p>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Payouts</h2>
-        <div className="mt-4 overflow-hidden rounded-2xl border border-border">
+        <div className="panel mt-4 overflow-hidden rounded-2xl">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/60 text-foreground/50">
               <tr>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Payroll runs</h2>
-        <div className="mt-4 overflow-hidden rounded-2xl border border-border">
+        <div className="panel mt-4 overflow-hidden rounded-2xl">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/60 text-foreground/50">
               <tr>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border p-5">
+    <div className="panel rounded-2xl p-5">
       <p className="text-xs uppercase tracking-widest text-foreground/50">{label}</p>
       <p className="mt-2 font-mono text-sm">{value}</p>
     </div>
