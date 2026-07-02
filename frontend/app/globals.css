@@ -1,6 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
+* {
+  box-sizing: border-box;
+}
+
 :root {
+  /* Landing page design tokens (see components/landing/*) */
+  --font-heading: "Helvetica Now Display Bold", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --color-text: #192837;
+  --color-login-bg: #f2f2ee;
+
+  /* App-wide dark theme (dashboard, add-to-slack) - kept separate from the
+     landing tokens above so the two visual languages don't collide. */
   --background: #08070c;
   --foreground: #f4f2fb;
   --accent: #8b5cf6;
@@ -16,12 +29,10 @@
   --color-accent-soft: var(--accent-soft);
   --color-muted: var(--muted);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }

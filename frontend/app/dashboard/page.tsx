@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/useSession";
 import { api, ApiError, type Me, type Team, type PayoutSummary, type PayrollRunSummary } from "@/lib/api";
+import { AppShell } from "@/components/AppShell";
 import { SlackButton } from "@/components/SlackButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SLACK_LOGIN_URL } from "@/lib/config";
@@ -44,20 +45,23 @@ export default function DashboardPage() {
 
   if (!token) {
     return (
-      <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center px-6 py-32 text-center">
-        <h1 className="text-2xl font-semibold">Sign in with Slack</h1>
-        <p className="mt-3 text-foreground/70">
-          Your dashboard shows payout history for your workspace only - amounts are never
-          included, only status and timestamps.
-        </p>
-        <div className="mt-8">
-          <SlackButton href={SLACK_LOGIN_URL} label="Sign in with Slack" />
-        </div>
-      </main>
+      <AppShell>
+        <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center px-6 py-32 text-center">
+          <h1 className="text-2xl font-semibold">Sign in with Slack</h1>
+          <p className="mt-3 text-foreground/70">
+            Your dashboard shows payout history for your workspace only - amounts are never
+            included, only status and timestamps.
+          </p>
+          <div className="mt-8">
+            <SlackButton href={SLACK_LOGIN_URL} label="Sign in with Slack" />
+          </div>
+        </main>
+      </AppShell>
     );
   }
 
   return (
+    <AppShell>
     <main className="mx-auto max-w-5xl flex-1 px-6 py-12">
       <div className="flex items-center justify-between">
         <div>
@@ -162,6 +166,7 @@ export default function DashboardPage() {
         </div>
       </section>
     </main>
+    </AppShell>
   );
 }
 

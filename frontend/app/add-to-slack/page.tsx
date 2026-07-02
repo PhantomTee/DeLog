@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/AppShell";
 import { SlackButton } from "@/components/SlackButton";
 import { SLACK_INSTALL_URL } from "@/lib/config";
 
@@ -9,6 +10,7 @@ const REQUIREMENTS = [
 
 export default function AddToSlackPage() {
   return (
+    <AppShell>
     <main className="mx-auto max-w-2xl flex-1 px-6 py-20 text-center">
       <h1 className="text-3xl font-semibold tracking-tight">Add Zamance to your Slack</h1>
       <p className="mt-4 text-foreground/70">
@@ -37,5 +39,6 @@ export default function AddToSlackPage() {
         </p>
       </div>
     </main>
+    </AppShell>
   );
 }
