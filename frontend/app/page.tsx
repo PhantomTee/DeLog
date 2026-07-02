@@ -35,7 +35,7 @@ export default function Home() {
         <Hero />
       </div>
 
-      <section id="features" className="mx-auto max-w-5xl px-6 py-20">
+      <section className="mx-auto max-w-5xl px-6 py-20">
         <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
           Features
         </h2>
@@ -53,7 +53,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" style={{ background: "var(--color-login-bg)" }}>
+      <section style={{ background: "var(--color-login-bg)" }}>
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
             How it works
@@ -72,7 +72,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="security" className="mx-auto max-w-5xl px-6 py-20">
+      <section className="mx-auto max-w-5xl px-6 py-20">
         <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
           No single point of failure
         </h2>
@@ -81,6 +81,9 @@ export default function Home() {
           co-sign, but a human owner must always add the second signature before anything
           executes - the bot alone can never move funds.
         </p>
+        <a href="/security" className="mt-4 inline-block text-sm underline" style={{ color: "#7342E2" }}>
+          Full security model &rarr;
+        </a>
       </section>
 
       <footer className="px-6 py-8 text-sm opacity-50" style={{ borderTop: "1px solid rgba(25,40,55,0.1)" }}>

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRightCircle } from "lucide-react";
 import { fadeUp } from "@/lib/motion";
 import { SLACK_INSTALL_URL } from "@/lib/config";
+import { RotatingHeadline } from "./RotatingHeadline";
 
 export function Hero() {
   return (
@@ -26,9 +27,7 @@ export function Hero() {
             color: "var(--color-text)",
           }}
         >
-          Pay Your Team, Privately
-          <br />
-          Encrypted On-Chain
+          <RotatingHeadline />
         </motion.h1>
 
         <motion.p
