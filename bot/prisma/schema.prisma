@@ -1,0 +1,87 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// One row per Slack workspace that has installed Zamance. Doubles as the Slack Bolt
+// InstallationStore backing table (see src/slack/installationStore.ts) and as the per-team
+// treasury config. safeAddress/tokenAddress are nullable because a team must run
+// /setup-treasury after installing - Zamance cannot auto-deploy a Safe or a confidential token
+// for them (that requires their own gas-funded key and their own on-chain deployment choices).
+model Team {
+  id            String   @id // Slack team_id
+  name          String?
+  botToken      String
+  botUserId     String?
+  botScopes     String?
+  installedAt   DateTime @default(now())
+  safeAddress   String?
+  tokenAddress  String?
+
+  wallets       Wallet[]
+  payouts       Payout[]
+  payrollRuns   PayrollRun[]
+  auditLogs     AuditLog[]
+}
+
+model Wallet {
+  id          String   @id @default(cuid())
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  slackUserId String
+  ethAddress  String
+  createdAt   DateTime @default(now())
+
+  @@unique([teamId, slackUserId])
+}
+
+// Deliberately does NOT store the plaintext payout amount - the amount only ever exists
+// in memory long enough to build the encrypted input, then it's discarded. Persisting it here
+// would defeat the point of using a confidential token. amountHandle is the on-chain euint64
+// ciphertext handle (an opaque bytes32); it is safe to store since it discloses nothing without
+// the recipient's own decryption credentials.
+model Payout {
+  id            String      @id @default(cuid())
+  teamId        String
+  team          Team        @relation(fields: [teamId], references: [id])
+  requesterId   String
+  recipientId   String
+  recipientAddr String
+  amountHandle  String?
+  safeTxHash    String?
+  status        String      @default("pending_approval")
+  txHash        String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  payrollRunId  String?
+  payrollRun    PayrollRun? @relation(fields: [payrollRunId], references: [id])
+}
+
+model PayrollRun {
+  id          String   @id @default(cuid())
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  requesterId String
+  safeTxHash  String?
+  status      String   @default("pending_approval")
+  txHash      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       Payout[]
+}
+
+// `detail` must never contain a plaintext payout amount - log payout/payroll IDs and
+// addresses only, never the confidential value.
+model AuditLog {
+  id        String   @id @default(cuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  actorId   String
+  action    String
+  detail    String
+  createdAt DateTime @default(now())
+}

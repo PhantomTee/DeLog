@@ -1,0 +1,67 @@
+/**
+ * @file index.ts
+ * @description Zamance Slack Bolt app bootstrap. Socket Mode handles events/commands for every
+ * installed workspace over one WebSocket connection (no public events endpoint needed); a small
+ * HTTP server (spun up by SocketModeReceiver whenever OAuth options are present) serves the
+ * install/OAuth-redirect routes plus the dashboard API in ./http/routes.ts.
+ */
+
+import "dotenv/config";
+import { App } from "@slack/bolt";
+import { prismaInstallationStore } from "./slack/installationStore";
+import { dashboardRoutes } from "./http/routes";
+import { handleRegisterWallet } from "./slack/commands/registerWallet";
+import { openPayoutModal, handlePayoutSubmission, PAYOUT_CALLBACK_ID } from "./slack/commands/payout";
+import { openPayrollModal, handlePayrollSubmission, PAYROLL_CALLBACK_ID } from "./slack/commands/payroll";
+import { handlePayoutStatus } from "./slack/commands/payoutStatus";
+import { handleFundTreasury } from "./slack/commands/fundTreasury";
+import { handleSetupTreasury } from "./slack/commands/setupTreasury";
+import { startApprovalPoller } from "./workers/approvalPoller";
+
+const BOT_SCOPES = ["commands", "chat:write", "im:write", "users:read"];
+
+const app = new App({
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  appToken: process.env.SLACK_APP_TOKEN,
+  socketMode: true,
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  stateSecret: process.env.SLACK_STATE_SECRET,
+  scopes: BOT_SCOPES,
+  installationStore: prismaInstallationStore,
+  installerOptions: {
+    redirectUriPath: "/slack/oauth_redirect",
+    port: Number(process.env.PORT ?? 3001),
+  },
+  customRoutes: dashboardRoutes,
+});
+
+app.command("/register-wallet", handleRegisterWallet);
+app.command("/payout", openPayoutModal);
+app.command("/payroll", openPayrollModal);
+app.command("/payout-status", handlePayoutStatus);
+app.command("/fund-treasury", handleFundTreasury);
+app.command("/setup-treasury", handleSetupTreasury);
+
+app.view(PAYOUT_CALLBACK_ID, handlePayoutSubmission);
+app.view(PAYROLL_CALLBACK_ID, handlePayrollSubmission);
+
+async function main() {
+  await app.start();
+  console.log("[bot] Zamance running in Socket Mode; OAuth + dashboard API on port", process.env.PORT ?? 3001);
+
+  const stopPoller = startApprovalPoller();
+  process.on("SIGTERM", () => {
+    stopPoller();
+    process.exit(0);
+  });
+  process.on("SIGINT", () => {
+    stopPoller();
+    process.exit(0);
+  });
+}
+
+main().catch((err) => {
+  console.error("[bot] fatal startup error", err);
+  process.exitCode = 1;
+});

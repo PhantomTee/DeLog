@@ -1,0 +1,24 @@
+node_modules/
+.env
+.env.local
+
+# Hardhat
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+contracts/deployments/
+contracts/dist/
+contracts/fhevmTemp/
+
+# Bot
+bot/dist/
+bot/prisma/dev.db
+bot/prisma/dev.db-journal
+
+# Frontend (Next.js)
+frontend/.next/
+frontend/out/
+
+# Misc
+*.log
+.DS_Store
