@@ -1,0 +1,43 @@
+databases:
+  - name: zamance-db
+    plan: free
+    databaseName: zamance
+    user: zamance
+
+services:
+  - type: web
+    name: zamance-bot
+    runtime: docker
+    plan: free
+    rootDir: bot
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zamance-db
+          property: connectionString
+      - key: RPC_URL
+        value: https://ethereum-sepolia-rpc.publicnode.com
+      - key: DASHBOARD_ORIGIN
+        value: https://zamance.vercel.app
+      - key: APPROVAL_POLL_INTERVAL_MS
+        value: "30000"
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: SLACK_APP_TOKEN
+        sync: false
+      - key: SLACK_CLIENT_ID
+        sync: false
+      - key: SLACK_CLIENT_SECRET
+        sync: false
+      - key: SLACK_STATE_SECRET
+        sync: false
+      - key: SLACK_OIDC_REDIRECT_URI
+        sync: false
+      - key: BOT_SAFE_SIGNER_PRIVATE_KEY
+        sync: false
+      - key: SAFE_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false

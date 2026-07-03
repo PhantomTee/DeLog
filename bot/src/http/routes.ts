@@ -20,6 +20,14 @@ function frontendUrl(path: string): string {
 
 export const dashboardRoutes: CustomRoute[] = [
   {
+    path: "/healthz",
+    method: "GET",
+    handler: (_req, res) => {
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.end("ok");
+    },
+  },
+  {
     path: "/auth/slack/login",
     method: "GET",
     handler: (_req, res) => {

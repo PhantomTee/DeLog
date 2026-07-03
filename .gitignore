@@ -19,6 +19,11 @@ bot/prisma/dev.db-journal
 frontend/.next/
 frontend/out/
 
+# Local Claude Code tooling (installed via `npx skills add`, not part of the product)
+.agents/
+.claude/skills/zama-*/
+skills-lock.json
+
 # Misc
 *.log
 .DS_Store
