@@ -42,7 +42,7 @@ export function Navbar() {
             <a
               href={SLACK_LOGIN_URL}
               className="rounded-full px-5 py-2.5 text-sm font-semibold transition hover:shadow-lg active:scale-95"
-              style={{ background: "#F2F2EE", color: "var(--color-text)" }}
+              style={{ background: "var(--color-login-bg)", color: "var(--color-text)" }}
             >
               Sign In
             </a>

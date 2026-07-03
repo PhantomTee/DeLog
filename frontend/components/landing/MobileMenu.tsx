@@ -80,7 +80,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
               <a
                 href={SLACK_LOGIN_URL}
                 className="rounded-full py-3.5 text-center font-semibold"
-                style={{ background: "#F2F2EE", color: "#192837", fontSize: "0.95rem" }}
+                style={{ background: "var(--color-login-bg)", color: "var(--color-text)", fontSize: "0.95rem" }}
               >
                 Sign In
               </a>

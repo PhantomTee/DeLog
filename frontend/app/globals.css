@@ -11,14 +11,14 @@
 
   /* One palette, used everywhere - landing, docs, dashboard alike. */
   --color-text: #192837;
-  --color-login-bg: #f2f2ee;
+  --color-login-bg: #ece3fb;
 
   --background: #ffffff;
   --foreground: #192837;
   --accent: #7342e2;
   --accent-soft: #9a6ee8;
-  --muted: #f2f2ee;
-  --border: rgba(25, 40, 55, 0.1);
+  --muted: #ece3fb;
+  --border: rgba(115, 66, 226, 0.18);
 }
 
 @theme inline {
@@ -42,16 +42,18 @@ body {
    background instead of separate solid blocks per section/page. */
 .site-glow {
   background:
-    radial-gradient(circle at 15% 10%, rgba(115, 66, 226, 0.14), transparent 45%),
-    radial-gradient(circle at 85% 25%, rgba(115, 66, 226, 0.1), transparent 50%),
-    radial-gradient(circle at 50% 100%, rgba(115, 66, 226, 0.08), transparent 60%),
-    #ffffff;
+    radial-gradient(circle at 15% 8%, rgba(115, 66, 226, 0.45), transparent 48%),
+    radial-gradient(circle at 88% 15%, rgba(154, 110, 232, 0.4), transparent 52%),
+    radial-gradient(circle at 12% 60%, rgba(115, 66, 226, 0.3), transparent 55%),
+    radial-gradient(circle at 90% 75%, rgba(115, 66, 226, 0.32), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(115, 66, 226, 0.28), transparent 65%),
+    linear-gradient(180deg, #f3edfd 0%, #f8f5ff 45%, #ffffff 100%);
 }
 
 /* Frosted panel used instead of solid-color section blocks, so content sits
    on the shared glow rather than interrupting it. */
 .panel {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(243, 235, 253, 0.65);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
 }
