@@ -32,6 +32,15 @@ const app = new App({
   installerOptions: {
     redirectUriPath: "/slack/oauth_redirect",
     port: Number(process.env.PORT ?? 3001),
+    // After a fresh "Add to Slack" install, drop straight into the OIDC sign-in
+    // flow instead of Bolt's default "Success!" page, so install -> dashboard
+    // is one continuous hop regardless of which button the user started from.
+    callbackOptions: {
+      success: (_installation, _options, _req, res) => {
+        res.writeHead(302, { Location: "/auth/slack/login" });
+        res.end();
+      },
+    },
   },
   customRoutes: dashboardRoutes,
 });

@@ -54,7 +54,10 @@ export const dashboardRoutes: CustomRoute[] = [
         const info = await exchangeCodeForUserInfo(code);
         const team = await getTeam(info.teamId);
         if (!team) {
-          res.writeHead(302, { Location: frontendUrl("/dashboard?error=not_installed") });
+          // Not installed yet - send them straight into the install flow instead of a
+          // dead-end error. Bolt's post-install success callback (see ../index.ts) bounces
+          // back here, so "Sign In" and "Add to Slack" converge on the same result either way.
+          res.writeHead(302, { Location: "/slack/install" });
           res.end();
           return;
         }
