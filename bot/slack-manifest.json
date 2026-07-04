@@ -48,18 +48,25 @@
   },
   "oauth_config": {
     "redirect_urls": [
-      "https://your-bot-host.example.com/slack/oauth_redirect"
+      "https://zamance-bot.onrender.com/slack/oauth_redirect",
+      "https://zamance-bot.onrender.com/auth/slack/callback"
     ],
     "scopes": {
       "bot": [
         "commands",
         "chat:write",
         "im:write",
+        "im:history",
         "users:read"
       ]
     }
   },
   "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "message.im"
+      ]
+    },
     "interactivity": {
       "is_enabled": true
     },

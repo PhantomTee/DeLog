@@ -54,19 +54,29 @@ features:
 oauth_config:
   redirect_urls:
     - https://<your-bot-host>/slack/oauth_redirect
+    - https://<your-bot-host>/auth/slack/callback
   scopes:
     bot:
       - commands
       - chat:write
       - im:write
+      - im:history
       - users:read
 settings:
+  event_subscriptions:
+    bot_events:
+      - message.im
   interactivity:
     is_enabled: true
   socket_mode_enabled: true
   org_deploy_enabled: false
   token_rotation_enabled: false
 ```
+
+`im:history` + the `message.im` event subscription power the natural-language DM flow
+(`bot/src/slack/nlPayout.ts`) - message someone "pay Sarah 500" instead of running
+`/payout`. Adding these to an already-installed app requires reinstalling (Slack
+requires reauthorization whenever bot scopes change).
 
 Then:
 - Enable **public distribution** (Manage Distribution) so any workspace can

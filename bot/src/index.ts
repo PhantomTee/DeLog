@@ -16,9 +16,18 @@ import { openPayrollModal, handlePayrollSubmission, PAYROLL_CALLBACK_ID } from "
 import { handlePayoutStatus } from "./slack/commands/payoutStatus";
 import { handleFundTreasury } from "./slack/commands/fundTreasury";
 import { handleSetupTreasury } from "./slack/commands/setupTreasury";
+import {
+  handleNaturalLanguageMessage,
+  handleNlPayoutConfirm,
+  handleNlPayoutCancel,
+  CONFIRM_ACTION_ID,
+  CANCEL_ACTION_ID,
+} from "./slack/nlPayout";
 import { startApprovalPoller } from "./workers/approvalPoller";
 
-const BOT_SCOPES = ["commands", "chat:write", "im:write", "users:read"];
+// im:history is required to read the text of DMs sent to the bot (see nlPayout.ts). Existing
+// installs need to re-authorize once this ships - Slack requires reinstall on scope changes.
+const BOT_SCOPES = ["commands", "chat:write", "im:write", "im:history", "users:read"];
 
 const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -54,6 +63,10 @@ app.command("/setup-treasury", handleSetupTreasury);
 
 app.view(PAYOUT_CALLBACK_ID, handlePayoutSubmission);
 app.view(PAYROLL_CALLBACK_ID, handlePayrollSubmission);
+
+app.message(handleNaturalLanguageMessage);
+app.action(CONFIRM_ACTION_ID, handleNlPayoutConfirm);
+app.action(CANCEL_ACTION_ID, handleNlPayoutCancel);
 
 async function main() {
   await app.start();

@@ -1,26 +1,14 @@
 /**
  * @file payout.ts
  * @description /payout opens a modal (recipient + amount); on submit, resolves the recipient's
- * registered address, encrypts the amount for the team's Safe (the on-chain caller), proposes a
- * Safe transaction, and notifies the requester + Safe owners by DM only - no public channel
- * messages.
+ * registered address and hands off to payoutEngine to propose the Safe transaction and notify
+ * everyone involved - no public channel messages.
  */
 
 import type { SlackCommandMiddlewareArgs, AllMiddlewareArgs, SlackViewMiddlewareArgs } from "@slack/bolt";
-import type { WebClient } from "@slack/web-api";
-import {
-  getWalletAddress,
-  createPendingPayout,
-  attachSafeTx,
-  markPayoutFailed,
-  logAudit,
-  getRegisteredOwnerSlackIds,
-} from "../../db/repository";
-import { buildEncryptedAmount } from "../../chain/fheEncrypt";
-import { buildConfidentialTransferCall, proposeSafeTransaction, getSafeOwners } from "../../chain/safe";
-import { tokenInterface } from "../../chain/token";
-import { dmUser } from "../dm";
+import { getWalletAddress } from "../../db/repository";
 import { requireTeamTreasury, TREASURY_NOT_CONFIGURED_MESSAGE } from "../teamConfig";
+import { proposeSinglePayout } from "../payoutEngine";
 
 export const PAYOUT_CALLBACK_ID = "payout_modal";
 
@@ -105,57 +93,9 @@ export async function handlePayoutSubmission({
 
   await ack();
 
-  const payout = await createPendingPayout({ teamId, requesterId, recipientId, recipientAddr });
-
-  try {
-    // The Safe is msg.sender when the transfer executes on-chain, so the encrypted input
-    // must be bound to the Safe's address, not the bot's own key.
-    const { handle, inputProof } = await buildEncryptedAmount(treasury.tokenAddress, treasury.safeAddress, amount);
-    const call = buildConfidentialTransferCall(
-      treasury.tokenAddress,
-      tokenInterface,
-      recipientAddr,
-      handle,
-      inputProof,
-    );
-    const { safeTxHash } = await proposeSafeTransaction(treasury.safeAddress, [call]);
-
-    await attachSafeTx(payout.id, safeTxHash, handle);
-    await logAudit(teamId, requesterId, "payout_proposed", `payoutId=${payout.id} safeTxHash=${safeTxHash}`);
-
-    await notifyPayoutProposed(client, teamId, treasury.safeAddress, payout.id, requesterId, recipientId, safeTxHash);
-  } catch (err) {
-    await markPayoutFailed(payout.id);
-    await dmUser(
-      client,
-      requesterId,
-      `Payout ${payout.id} failed to propose: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
-}
-
-async function notifyPayoutProposed(
-  client: WebClient,
-  teamId: string,
-  safeAddress: string,
-  payoutId: string,
-  requesterId: string,
-  recipientId: string,
-  safeTxHash: string,
-): Promise<void> {
-  await dmUser(
-    client,
-    requesterId,
-    `Payout ${payoutId} proposed to the Safe (tx ${safeTxHash}). Waiting for a second owner to sign in Safe{Wallet}.`,
-  );
-
-  const owners = await getSafeOwners(safeAddress);
-  const ownerSlackIds = await getRegisteredOwnerSlackIds(teamId, owners);
-  for (const ownerId of ownerSlackIds.filter((id) => id !== requesterId)) {
-    await dmUser(
-      client,
-      ownerId,
-      `A payout to <@${recipientId}> is awaiting your signature. Open Safe{Wallet} and sign tx ${safeTxHash}. (Details are intentionally not posted here or in any channel.)`,
-    );
-  }
+  await proposeSinglePayout(client, teamId, requesterId, treasury, {
+    slackUserId: recipientId,
+    address: recipientAddr,
+    amount,
+  });
 }
