@@ -42,20 +42,62 @@ function getApiKit(): SafeApiKit {
   });
 }
 
-/** Builds a MetaTransactionData call to ConfidentialPayoutToken.confidentialTransfer(to, handle, proof). */
+/** Builds a MetaTransactionData call to ConfidentialUSDCWrapper.confidentialTransfer(to, handle, proof) - the private payout path. */
 export function buildConfidentialTransferCall(
-  tokenAddress: string,
-  tokenInterface: ethers.Interface,
+  wrapperAddress: string,
+  wrapperInterface: ethers.Interface,
   to: string,
   encHandle: string,
   encInputProof: string,
 ): MetaTransactionData {
-  const data = tokenInterface.encodeFunctionData("confidentialTransfer(address,bytes32,bytes)", [
+  const data = wrapperInterface.encodeFunctionData("confidentialTransfer(address,bytes32,bytes)", [
     to,
     encHandle,
     encInputProof,
   ]);
-  return { to: tokenAddress, value: "0", data, operation: OperationType.Call };
+  return { to: wrapperAddress, value: "0", data, operation: OperationType.Call };
+}
+
+/**
+ * Builds a MetaTransactionData call to real USDC.transfer(to, amount) - the public, transparent
+ * payout path. `amount` is plaintext on-chain calldata; only use this when the toggle is
+ * explicitly set to public.
+ */
+export function buildPlainTransferCall(
+  usdcAddress: string,
+  usdcInterface: ethers.Interface,
+  to: string,
+  amount: bigint,
+): MetaTransactionData {
+  const data = usdcInterface.encodeFunctionData("transfer(address,uint256)", [to, amount]);
+  return { to: usdcAddress, value: "0", data, operation: OperationType.Call };
+}
+
+/** Builds a MetaTransactionData call to real USDC.approve(spender, amount) - used before wrap(). */
+export function buildApproveCall(
+  usdcAddress: string,
+  usdcInterface: ethers.Interface,
+  spender: string,
+  amount: bigint,
+): MetaTransactionData {
+  const data = usdcInterface.encodeFunctionData("approve(address,uint256)", [spender, amount]);
+  return { to: usdcAddress, value: "0", data, operation: OperationType.Call };
+}
+
+/**
+ * Builds a MetaTransactionData call to ConfidentialUSDCWrapper.wrap(to, amount) - pulls `amount`
+ * of real USDC from msg.sender (the Safe) and mints a confidential balance to `to`. `amount` is
+ * plaintext on-chain calldata (wrap() has no encrypted-amount overload), so this is a visible
+ * treasury-funding step, not a private per-payout call - see /fund-treasury.
+ */
+export function buildWrapCall(
+  wrapperAddress: string,
+  wrapperInterface: ethers.Interface,
+  to: string,
+  amount: bigint,
+): MetaTransactionData {
+  const data = wrapperInterface.encodeFunctionData("wrap(address,uint256)", [to, amount]);
+  return { to: wrapperAddress, value: "0", data, operation: OperationType.Call };
 }
 
 export interface ProposedTransaction {

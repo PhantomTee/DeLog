@@ -19,6 +19,10 @@ services:
           property: connectionString
       - key: RPC_URL
         value: https://ethereum-sepolia-rpc.publicnode.com
+      - key: USDC_ADDRESS
+        value: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      - key: WRAPPER_ADDRESS
+        value: "0xBF525F705d2190BF4A58B82f07DD8676c65a9e9D"
       - key: DASHBOARD_ORIGIN
         value: https://zamance.vercel.app
       - key: APPROVAL_POLL_INTERVAL_MS

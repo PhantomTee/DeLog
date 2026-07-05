@@ -11,8 +11,8 @@ export async function getTeam(teamId: string) {
   return prisma.team.findUnique({ where: { id: teamId } });
 }
 
-export async function setTeamTreasury(teamId: string, safeAddress: string, tokenAddress: string) {
-  return prisma.team.update({ where: { id: teamId }, data: { safeAddress, tokenAddress } });
+export async function setTeamTreasury(teamId: string, safeAddress: string) {
+  return prisma.team.update({ where: { id: teamId }, data: { safeAddress } });
 }
 
 export async function registerWallet(teamId: string, slackUserId: string, ethAddress: string) {
@@ -40,6 +40,7 @@ export async function createPendingPayout(params: {
   requesterId: string;
   recipientId: string;
   recipientAddr: string;
+  isPrivate: boolean;
   payrollRunId?: string;
 }) {
   return prisma.payout.create({
@@ -48,13 +49,14 @@ export async function createPendingPayout(params: {
       requesterId: params.requesterId,
       recipientId: params.recipientId,
       recipientAddr: params.recipientAddr,
+      isPrivate: params.isPrivate,
       payrollRunId: params.payrollRunId,
       status: "pending_approval",
     },
   });
 }
 
-export async function attachSafeTx(payoutId: string, safeTxHash: string, amountHandle: string) {
+export async function attachSafeTx(payoutId: string, safeTxHash: string, amountHandle?: string) {
   return prisma.payout.update({
     where: { id: payoutId },
     data: { safeTxHash, amountHandle, status: "awaiting_signatures" },
@@ -93,8 +95,8 @@ export async function listPayrollRuns(teamId: string, limit = 20) {
   });
 }
 
-export async function createPayrollRun(teamId: string, requesterId: string) {
-  return prisma.payrollRun.create({ data: { teamId, requesterId, status: "pending_approval" } });
+export async function createPayrollRun(teamId: string, requesterId: string, isPrivate: boolean) {
+  return prisma.payrollRun.create({ data: { teamId, requesterId, isPrivate, status: "pending_approval" } });
 }
 
 export async function attachPayrollSafeTx(payrollRunId: string, safeTxHash: string) {

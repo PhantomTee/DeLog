@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Support - Zamance" };
 const FAQ = [
   {
     q: "\"This workspace hasn't configured a treasury yet\"",
-    a: "A workspace admin needs to run /setup-treasury <safeAddress> <tokenAddress> first - see the Docs page for the full onboarding flow.",
+    a: "A workspace admin needs to run /setup-treasury <safeAddress> first - see the Docs page for the full onboarding flow.",
   },
   {
     q: "\"This user has not run /register-wallet yet\"",

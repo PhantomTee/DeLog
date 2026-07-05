@@ -1,15 +1,16 @@
 /**
  * @file fundTreasury.ts
- * @description /fund-treasury <amount> - mints encrypted supply to the team's Safe. mint() is
- * onlyOwner on ConfidentialPayoutToken and ownership is the Safe post-deploy, so this goes
- * through the same propose/co-sign/execute flow as a payout. Restricted to registered Safe
- * owners so a random workspace member cannot spam mint proposals.
+ * @description /fund-treasury <amount> - shields part of the Safe's own real USDC balance into
+ * its confidential balance inside the shared ConfidentialUSDCWrapper, so private payouts have
+ * encrypted balance to draw from. Wrapping takes a plaintext amount on-chain (wrap() has no
+ * encrypted-amount overload), so this is a visible "moved X into privacy" treasury action - not
+ * a private payout itself. It bundles approve() + wrap() as one atomic Safe MultiSend proposal.
+ * Restricted to registered Safe owners so a random workspace member cannot spam proposals.
  */
 
 import type { SlackCommandMiddlewareArgs, AllMiddlewareArgs } from "@slack/bolt";
-import { buildEncryptedAmount } from "../../chain/fheEncrypt";
-import { proposeSafeTransaction, getSafeOwners } from "../../chain/safe";
-import { tokenInterface } from "../../chain/token";
+import { buildApproveCall, buildWrapCall, proposeSafeTransaction, getSafeOwners } from "../../chain/safe";
+import { usdcInterface, wrapperInterface, getWrapperAddress } from "../../chain/token";
 import { logAudit, getRegisteredOwnerSlackIds } from "../../db/repository";
 import { requireTeamTreasury, TREASURY_NOT_CONFIGURED_MESSAGE } from "../teamConfig";
 
@@ -41,24 +42,19 @@ export async function handleFundTreasury({
     amount = BigInt(command.text.trim());
     if (amount <= 0n) throw new Error("non-positive");
   } catch {
-    await respond({ response_type: "ephemeral", text: "Usage: /fund-treasury <positive whole number>" });
+    await respond({ response_type: "ephemeral", text: "Usage: /fund-treasury <positive whole number, in USDC base units>" });
     return;
   }
 
-  const { handle, inputProof } = await buildEncryptedAmount(treasury.tokenAddress, treasury.safeAddress, amount);
-  const data = tokenInterface.encodeFunctionData("mint(address,bytes32,bytes)", [
-    treasury.safeAddress,
-    handle,
-    inputProof,
-  ]);
-  const { safeTxHash } = await proposeSafeTransaction(treasury.safeAddress, [
-    { to: treasury.tokenAddress, value: "0", data },
-  ]);
+  const wrapperAddress = getWrapperAddress();
+  const approveCall = buildApproveCall(treasury.safeAddress, usdcInterface, wrapperAddress, amount);
+  const wrapCall = buildWrapCall(wrapperAddress, wrapperInterface, treasury.safeAddress, amount);
+  const { safeTxHash } = await proposeSafeTransaction(treasury.safeAddress, [approveCall, wrapCall]);
 
-  await logAudit(command.team_id, command.user_id, "treasury_mint_proposed", `safeTxHash=${safeTxHash}`);
+  await logAudit(command.team_id, command.user_id, "treasury_wrap_proposed", `safeTxHash=${safeTxHash}`);
 
   await respond({
     response_type: "ephemeral",
-    text: `Mint proposed (tx ${safeTxHash}). A second Safe owner must sign AND execute it in Safe{Wallet} - the bot's approval worker only auto-executes /payout and /payroll transactions, not treasury mints.`,
+    text: `Wrap proposed (tx ${safeTxHash}): shields ${amount} of the Safe's real USDC into its confidential balance. A second Safe owner must sign AND execute it in Safe{Wallet} - the bot's approval worker only auto-executes /payout and /payroll transactions, not treasury wraps. The Safe must already hold that much real Sepolia USDC.`,
   });
 }

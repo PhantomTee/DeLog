@@ -43,8 +43,22 @@ export async function openPayrollModal({
         {
           type: "input",
           block_id: "lines",
-          label: { type: "plain_text", text: "One recipient per line: <@USERID> amount" },
+          label: { type: "plain_text", text: "One recipient per line: <@USERID> amount (USDC base units)" },
           element: { type: "plain_text_input", action_id: "lines_input", multiline: true },
+        },
+        {
+          type: "input",
+          block_id: "visibility",
+          label: { type: "plain_text", text: "Visibility (applies to the whole run)" },
+          element: {
+            type: "radio_buttons",
+            action_id: "visibility_input",
+            initial_option: { text: { type: "plain_text", text: "Private (encrypted)" }, value: "private" },
+            options: [
+              { text: { type: "plain_text", text: "Private (encrypted)" }, value: "private" },
+              { text: { type: "plain_text", text: "Public (normal USDC)" }, value: "public" },
+            ],
+          },
         },
       ],
     },
@@ -75,6 +89,7 @@ export async function handlePayrollSubmission({
 }: SlackViewMiddlewareArgs & AllMiddlewareArgs): Promise<void> {
   const { teamId, requesterId } = JSON.parse(view.private_metadata) as { teamId: string; requesterId: string };
   const raw = view.state.values.lines.lines_input.value ?? "";
+  const isPrivate = (view.state.values.visibility.visibility_input.selected_option?.value ?? "private") === "private";
 
   let parsed: ParsedLine[];
   try {
@@ -113,5 +128,5 @@ export async function handlePayrollSubmission({
 
   await ack();
 
-  await proposeBatchPayroll(client, teamId, requesterId, treasury, resolved);
+  await proposeBatchPayroll(client, teamId, requesterId, treasury, resolved, isPrivate);
 }

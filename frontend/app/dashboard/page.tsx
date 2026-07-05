@@ -83,14 +83,15 @@ export default function DashboardPage() {
         <section className="mt-8 grid gap-4 sm:grid-cols-3">
           <Stat label="Treasury" value={team.treasuryConfigured ? "Configured" : "Not set up"} />
           <Stat label="Safe" value={short(team.safeAddress)} />
-          <Stat label="Token" value={short(team.tokenAddress)} />
+          <Stat label="Confidential wrapper" value={short(team.wrapperAddress)} />
         </section>
       )}
 
       {team && !team.treasuryConfigured && (
         <p className="panel mt-6 rounded-lg p-4 text-sm text-foreground/70">
-          Run <code>/setup-treasury &lt;safeAddress&gt; &lt;tokenAddress&gt;</code> in Slack to
-          connect your team&apos;s Safe and confidential token.
+          Run <code>/setup-treasury &lt;safeAddress&gt;</code> in Slack to connect your
+          team&apos;s Safe - payouts move real Sepolia USDC, either as a plain transfer or
+          privately through the shared confidential wrapper.
         </p>
       )}
 
@@ -101,6 +102,7 @@ export default function DashboardPage() {
             <thead className="bg-muted/60 text-foreground/50">
               <tr>
                 <th className="px-4 py-3 font-medium">Recipient</th>
+                <th className="px-4 py-3 font-medium">Visibility</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Tx</th>
                 <th className="px-4 py-3 font-medium">When</th>
@@ -109,7 +111,7 @@ export default function DashboardPage() {
             <tbody>
               {payouts.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-foreground/50">
+                  <td colSpan={5} className="px-4 py-6 text-center text-foreground/50">
                     No payouts yet.
                   </td>
                 </tr>
@@ -119,6 +121,7 @@ export default function DashboardPage() {
                   <td className="px-4 py-3">
                     &lt;@{p.recipientId}&gt;
                   </td>
+                  <td className="px-4 py-3 text-foreground/70">{p.isPrivate ? "Private" : "Public"}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={p.status} />
                   </td>
@@ -138,6 +141,7 @@ export default function DashboardPage() {
             <thead className="bg-muted/60 text-foreground/50">
               <tr>
                 <th className="px-4 py-3 font-medium">Recipients</th>
+                <th className="px-4 py-3 font-medium">Visibility</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Tx</th>
                 <th className="px-4 py-3 font-medium">When</th>
@@ -146,7 +150,7 @@ export default function DashboardPage() {
             <tbody>
               {runs.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-foreground/50">
+                  <td colSpan={5} className="px-4 py-6 text-center text-foreground/50">
                     No payroll runs yet.
                   </td>
                 </tr>
@@ -154,6 +158,7 @@ export default function DashboardPage() {
               {runs.map((r) => (
                 <tr key={r.id} className="border-t border-border">
                   <td className="px-4 py-3">{r.recipientCount}</td>
+                  <td className="px-4 py-3 text-foreground/70">{r.isPrivate ? "Private" : "Public"}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>

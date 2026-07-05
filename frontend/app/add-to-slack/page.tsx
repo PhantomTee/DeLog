@@ -4,8 +4,8 @@ import { SLACK_INSTALL_URL } from "@/lib/config";
 
 const REQUIREMENTS = [
   "A workspace admin to approve the install (Zamance requests commands, chat:write, im:write, users:read).",
-  "A Sepolia-funded deployer key to deploy your own ConfidentialPayoutToken contract.",
-  "A Gnosis Safe (2-of-N or higher) with Zamance added as one co-signing owner.",
+  "A Gnosis Safe (2-of-N or higher) with Zamance added as one co-signing owner - no token to deploy, payouts move real Sepolia USDC.",
+  "Some Sepolia testnet USDC in the Safe (e.g. from Circle's faucet) before running private or public payouts.",
 ];
 
 export default function AddToSlackPage() {
@@ -33,9 +33,9 @@ export default function AddToSlackPage() {
           ))}
         </ul>
         <p className="mt-6 text-sm text-foreground/50">
-          Zamance never deploys a Safe or a token on your behalf - your team keeps full control
-          over its own on-chain treasury. Once installed, run <code>/setup-treasury</code> in
-          Slack to connect it.
+          Zamance never deploys a Safe on your behalf - your team keeps full control over its own
+          on-chain treasury. Once installed, run <code>/setup-treasury</code> in Slack to connect
+          it.
         </p>
       </div>
     </main>

@@ -11,7 +11,8 @@ export interface Team {
   name: string | null;
   installedAt: string;
   safeAddress: string | null;
-  tokenAddress: string | null;
+  usdcAddress: string | null;
+  wrapperAddress: string | null;
   botSignerAddress: string;
   treasuryConfigured: boolean;
 }
@@ -20,6 +21,7 @@ export interface PayoutSummary {
   id: string;
   requesterId: string;
   recipientId: string;
+  isPrivate: boolean;
   status: string;
   safeTxHash: string | null;
   txHash: string | null;
@@ -29,6 +31,7 @@ export interface PayoutSummary {
 export interface PayrollRunSummary {
   id: string;
   requesterId: string;
+  isPrivate: boolean;
   status: string;
   safeTxHash: string | null;
   txHash: string | null;

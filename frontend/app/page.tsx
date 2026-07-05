@@ -5,8 +5,8 @@ import { Footer } from "@/components/Footer";
 
 const FEATURES = [
   {
-    title: "Encrypted amounts, on-chain",
-    body: "Payout amounts are encrypted end to end with Zama's FHEVM (ERC-7984). Balances and transfer amounts stay confidential - only the recipient can decrypt their own balance.",
+    title: "Real USDC, toggle the privacy",
+    body: "Every payout can go out as encrypted, confidential USDC via Zama's FHEVM (ERC-7984), or as a normal transparent USDC transfer - private by default, public when you say so.",
   },
   {
     title: "Slack-native, private by default",
@@ -21,10 +21,10 @@ const FEATURES = [
 const STEPS = [
   { title: "Add Zamance to Slack", body: "Install via OAuth - each workspace gets its own isolated installation." },
   {
-    title: "Deploy your treasury",
-    body: "Deploy a ConfidentialPayoutToken and create a Safe, add Zamance as a co-signing owner, then run /setup-treasury.",
+    title: "Connect your treasury",
+    body: "Create a Safe, add Zamance as a co-signing owner, then run /setup-treasury - no token to deploy, Zamance pays out in real Sepolia USDC.",
   },
-  { title: "Pay your team", body: "Use /payout or /payroll from Slack. A second Safe owner signs, Zamance executes and DMs both sides." },
+  { title: "Pay your team", body: "Use /payout or /payroll from Slack, toggling Private or Public. A second Safe owner signs, Zamance executes and DMs both sides." },
 ];
 
 export default function Home() {

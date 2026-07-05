@@ -96,9 +96,10 @@ export const dashboardRoutes: CustomRoute[] = [
         name: team.name,
         installedAt: team.installedAt,
         safeAddress: team.safeAddress,
-        tokenAddress: team.tokenAddress,
+        usdcAddress: process.env.USDC_ADDRESS ?? null,
+        wrapperAddress: process.env.WRAPPER_ADDRESS ?? null,
         botSignerAddress: getBotSignerAddress(),
-        treasuryConfigured: Boolean(team.safeAddress && team.tokenAddress),
+        treasuryConfigured: Boolean(team.safeAddress),
       });
     },
   },
@@ -117,6 +118,7 @@ export const dashboardRoutes: CustomRoute[] = [
           id: p.id,
           requesterId: p.requesterId,
           recipientId: p.recipientId,
+          isPrivate: p.isPrivate,
           status: p.status,
           safeTxHash: p.safeTxHash,
           txHash: p.txHash,
@@ -139,6 +141,7 @@ export const dashboardRoutes: CustomRoute[] = [
         runs.map((r) => ({
           id: r.id,
           requesterId: r.requesterId,
+          isPrivate: r.isPrivate,
           status: r.status,
           safeTxHash: r.safeTxHash,
           txHash: r.txHash,

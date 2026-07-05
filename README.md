@@ -3,22 +3,29 @@
 **Live:** https://zamance.vercel.app (frontend only for now - see "Run the bot
 backend" below; the dashboard needs a deployed `bot/` host to be functional).
 
-A Slack-first bot for processing team payments privately on Ethereum Sepolia,
-with a public dashboard (like the bot dashboards you'd see for Discord bots).
-Amounts are encrypted on-chain via a Zama FHEVM confidential ERC-7984 token;
-custody sits in each team's own Gnosis Safe multisig, where Zamance is one
-signer among several - the bot alone can never move funds.
+A Slack-first bot for processing team payments on Ethereum Sepolia in real
+Circle USDC, with a public dashboard (like the bot dashboards you'd see for
+Discord bots). Every payout has a public/private toggle (private by
+default): private payouts move an encrypted amount via a Zama FHEVM
+confidential ERC-7984 wrapper around USDC (`ConfidentialUSDCWrapper`),
+public payouts are a plain, transparent USDC transfer. Custody sits in each
+team's own Gnosis Safe multisig, where Zamance is one signer among several -
+the bot alone can never move funds.
 
 Zamance is multi-tenant: any Slack workspace can install it via OAuth
 ("Add to Slack"), and each installation is fully isolated - its own DB rows,
-its own treasury (Safe + token), its own dashboard login. Zamance does not
-(and cannot) deploy a Safe or a token on a team's behalf; a team admin
-deploys their own treasury and connects it with `/setup-treasury`.
+its own treasury (just a Safe), its own dashboard login. Zamance does not
+(and cannot) deploy a Safe on a team's behalf; a team admin creates their own
+Safe and connects it with `/setup-treasury`. The USDC contract and the
+confidential wrapper are shared, protocol-level constants (`USDC_ADDRESS` /
+`WRAPPER_ADDRESS`) - not something each team deploys, since balances inside
+the wrapper are already isolated per-Safe-address.
 
 ## Repo layout
 
 ```
-contracts/   Hardhat project - ConfidentialPayoutToken (ERC-7984 / FHEVM v0.11)
+contracts/   Hardhat project - ConfidentialUSDCWrapper, an ERC-7984 wrapper around real
+             Sepolia USDC (FHEVM v0.11); deployed once, shared by every team
 bot/         Slack Bolt backend (Socket Mode + OAuth install + dashboard API)
 frontend/    Next.js marketing site + "Add to Slack" + live dashboard
 ```
@@ -39,17 +46,17 @@ features:
       description: Register your Sepolia payout address
       usage_hint: "0x..."
     - command: /setup-treasury
-      description: Connect your team's Safe + confidential token (admin only)
-      usage_hint: "<safeAddress> <tokenAddress>"
+      description: Connect your team's Safe (admin only)
+      usage_hint: "<safeAddress>"
     - command: /payout
-      description: Propose a single private payout
+      description: Propose a single payout (toggle private/public in the modal)
     - command: /payroll
-      description: Propose a batch payroll run
+      description: Propose a batch payroll run (toggle private/public in the modal)
     - command: /payout-status
       description: Check a payout or payroll run's status
       usage_hint: "<id>"
     - command: /fund-treasury
-      description: Mint encrypted supply into the Safe (owners only)
+      description: Shield some of the Safe's real USDC into its confidential balance (owners only)
       usage_hint: "<amount>"
 oauth_config:
   redirect_urls:
@@ -93,7 +100,7 @@ Then:
 ```bash
 cd bot
 npm install
-cp .env.example .env   # fill in Slack app credentials, RPC_URL, BOT_SAFE_SIGNER_PRIVATE_KEY, SAFE_API_KEY, JWT_SECRET
+cp .env.example .env   # fill in Slack app credentials, RPC_URL, USDC_ADDRESS, WRAPPER_ADDRESS, BOT_SAFE_SIGNER_PRIVATE_KEY, SAFE_API_KEY, JWT_SECRET
 npx prisma migrate deploy
 npm run dev             # or: npm run build && npm start
 ```
@@ -118,27 +125,21 @@ npm run dev
 ## 4. Per-team onboarding (what an installing team actually does)
 
 1. Click **Add to Slack** on the Zamance site (real OAuth install).
-2. Deploy their own `ConfidentialPayoutToken` on Sepolia:
-   ```bash
-   cd contracts
-   npm install
-   cp .env.example .env   # PRIVATE_KEY (one-time deployer), RPC_URL
-   npx hardhat compile
-   npx hardhat run scripts/deploy.ts --network sepolia
-   ```
-3. Create a Safe at https://app.safe.global, add Zamance's bot address
-   (shown in the dashboard, or ask an admin to run `/setup-treasury` once
-   with a placeholder to see the expected address in the error message) as
-   an owner, threshold >= 2-of-N.
-4. Transfer token ownership to the Safe:
-   ```bash
-   SAFE_ADDRESS=0x... npx hardhat run scripts/transferOwnershipToSafe.ts --network sepolia
-   ```
-5. In Slack, run `/setup-treasury <safeAddress> <tokenAddress>` (workspace
-   admin only).
-6. `/fund-treasury <amount>` to mint encrypted supply, then sign + execute
-   the mint in Safe{Wallet}.
-7. Everyone who sends or receives payouts runs `/register-wallet 0x...`
+2. Create a Safe at https://app.safe.global (Sepolia), add Zamance's bot
+   address (shown in the dashboard, or ask an admin to run `/setup-treasury`
+   once with a placeholder to see the expected address in the error
+   message) as an owner, threshold >= 2-of-N.
+3. In Slack, run `/setup-treasury <safeAddress>` (workspace admin only).
+   There's no token to deploy - every team pays out in real Sepolia USDC
+   (`USDC_ADDRESS`) plus the one shared `ConfidentialUSDCWrapper`
+   (`WRAPPER_ADDRESS`), both protocol-level constants the bot already knows.
+4. Get the Safe some real Sepolia USDC (e.g. Circle's faucet at
+   https://faucet.circle.com, network "Ethereum Sepolia").
+5. `/fund-treasury <amount>` to shield part of that USDC into the Safe's
+   confidential balance, then sign + execute the wrap in Safe{Wallet}. Only
+   needed if you plan to send private payouts - public payouts spend the
+   Safe's plain USDC balance directly and need no wrapping step.
+6. Everyone who sends or receives payouts runs `/register-wallet 0x...`
    once - including the Safe owners themselves (Zamance resolves Safe
    owner addresses back to Slack IDs via this table to know who to DM for
    approvals).
@@ -146,19 +147,26 @@ npm run dev
 ## Verification (end-to-end on Sepolia)
 
 1. Install via the real "Add to Slack" OAuth flow into a test workspace.
-2. Complete onboarding steps 2-7 above with two test Slack accounts.
-3. `/payout @testuser 10` - confirm all responses are ephemeral/DM only,
-   never posted to a channel.
+2. Complete onboarding steps 2-6 above with two test Slack accounts.
+3. `/payout @testuser 10` with **Private** selected - confirm all responses
+   are ephemeral/DM only, never posted to a channel.
 4. Sign the proposed transaction with the second Safe owner in Safe{Wallet}.
    Within `APPROVAL_POLL_INTERVAL_MS`, the bot executes it and DMs both
    sides.
 5. Confirm the recipient's encrypted balance actually changed by decrypting
-   it (`bot/src/chain/fheEncrypt.ts`'s `decryptEuint64`) - do not just trust
-   the "executed" status.
-6. Sign in to the dashboard via "Sign in with Slack" and confirm the payout
-   shows up with correct status and no amount ever displayed.
-7. Repeat with `/payroll` and 2+ recipients; confirm atomic MultiSend
-   execution.
+   it (`bot/src/chain/fheEncrypt.ts`'s `decryptEuint64`) against
+   `WRAPPER_ADDRESS` - do not just trust the "executed" status.
+6. Repeat `/payout @testuser 10` with **Public** selected - confirm the
+   recipient's plain `USDC.balanceOf` increased by exactly 10 (this amount
+   is genuinely public on-chain, unlike the private path).
+7. Sign in to the dashboard via "Sign in with Slack" and confirm both
+   payouts show up with correct status and visibility, and no amount ever
+   displayed.
+8. Repeat with `/payroll` and 2+ recipients; confirm atomic MultiSend
+   execution for both visibility modes.
+9. In a DM to the bot, try "pay @testuser 5" (should default to private) and
+   "pay @testuser 5 publicly" (should go public) - confirm the confirmation
+   message states the correct visibility before you click Confirm.
 
 ## Security notes
 

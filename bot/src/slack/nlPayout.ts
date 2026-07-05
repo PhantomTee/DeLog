@@ -107,12 +107,13 @@ export async function handleNaturalLanguageMessage({
   const pendingItems: PendingItem[] = resolvedItems.map((r) => ({ i: r.slackUserId, m: r.amount.toString() }));
   const summary = resolvedItems.map((r) => `<@${r.slackUserId}> - ${r.amount.toString()}`).join("\n");
   const noun = pendingItems.length > 1 ? "payroll run" : "payout";
+  const visibility = intent.isPrivate ? "private (encrypted)" : "public (normal USDC)";
 
   await client.chat.postMessage({
     channel: message.channel,
-    text: `Confirm this ${noun}?\n${summary}`,
+    text: `Confirm this ${noun}? (${visibility})\n${summary}`,
     blocks: [
-      { type: "section", text: { type: "mrkdwn", text: `*Confirm this ${noun}?*\n${summary}` } },
+      { type: "section", text: { type: "mrkdwn", text: `*Confirm this ${noun}?* _(${visibility})_\n${summary}` } },
       {
         type: "actions",
         elements: [
@@ -121,7 +122,7 @@ export async function handleNaturalLanguageMessage({
             text: { type: "plain_text", text: "Confirm" },
             style: "primary",
             action_id: CONFIRM_ACTION_ID,
-            value: JSON.stringify({ teamId, items: pendingItems }),
+            value: JSON.stringify({ teamId, items: pendingItems, isPrivate: intent.isPrivate }),
           },
           {
             type: "button",
@@ -144,7 +145,11 @@ export async function handleNlPayoutConfirm({
   const action = body.actions?.[0];
   if (!action || !("value" in action) || !action.value) return;
 
-  const { teamId, items } = JSON.parse(action.value) as { teamId: string; items: PendingItem[] };
+  const { teamId, items, isPrivate } = JSON.parse(action.value) as {
+    teamId: string;
+    items: PendingItem[];
+    isPrivate: boolean;
+  };
   const requesterId = body.user.id;
 
   await updateOriginalMessage(client, body, "Confirmed - resolving current wallet addresses...");
@@ -169,9 +174,9 @@ export async function handleNlPayoutConfirm({
   }
 
   if (resolved.length === 1) {
-    await proposeSinglePayout(client, teamId, requesterId, treasury, resolved[0]);
+    await proposeSinglePayout(client, teamId, requesterId, treasury, resolved[0], isPrivate);
   } else {
-    await proposeBatchPayroll(client, teamId, requesterId, treasury, resolved);
+    await proposeBatchPayroll(client, teamId, requesterId, treasury, resolved, isPrivate);
   }
 }
 

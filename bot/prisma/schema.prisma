@@ -9,9 +9,11 @@ generator client {
 
 // One row per Slack workspace that has installed Zamance. Doubles as the Slack Bolt
 // InstallationStore backing table (see src/slack/installationStore.ts) and as the per-team
-// treasury config. safeAddress/tokenAddress are nullable because a team must run
-// /setup-treasury after installing - Zamance cannot auto-deploy a Safe or a confidential token
-// for them (that requires their own gas-funded key and their own on-chain deployment choices).
+// treasury config. safeAddress is nullable because a team must run /setup-treasury after
+// installing - Zamance cannot auto-deploy a Safe for them (that requires their own gas-funded
+// key and their own on-chain deployment choices). There is deliberately no tokenAddress column:
+// every team pays out in real Sepolia USDC plus one globally shared ConfidentialUSDCWrapper
+// (WRAPPER_ADDRESS env var) - those are protocol-level constants, not per-team deployments.
 model Team {
   id            String   @id // Slack team_id
   name          String?
@@ -20,7 +22,6 @@ model Team {
   botScopes     String?
   installedAt   DateTime @default(now())
   safeAddress   String?
-  tokenAddress  String?
 
   wallets       Wallet[]
   payouts       Payout[]
@@ -43,7 +44,9 @@ model Wallet {
 // in memory long enough to build the encrypted input, then it's discarded. Persisting it here
 // would defeat the point of using a confidential token. amountHandle is the on-chain euint64
 // ciphertext handle (an opaque bytes32); it is safe to store since it discloses nothing without
-// the recipient's own decryption credentials.
+// the recipient's own decryption credentials. isPrivate only records which path was used
+// (confidential wrapper vs plain USDC transfer) - it is never a substitute for the amount itself,
+// and for public payouts the amount is genuinely public anyway (visible in the USDC transfer calldata).
 model Payout {
   id            String      @id @default(cuid())
   teamId        String
@@ -51,6 +54,7 @@ model Payout {
   requesterId   String
   recipientId   String
   recipientAddr String
+  isPrivate     Boolean     @default(true)
   amountHandle  String?
   safeTxHash    String?
   status        String      @default("pending_approval")
@@ -66,6 +70,7 @@ model PayrollRun {
   teamId      String
   team        Team     @relation(fields: [teamId], references: [id])
   requesterId String
+  isPrivate   Boolean  @default(true)
   safeTxHash  String?
   status      String   @default("pending_approval")
   txHash      String?

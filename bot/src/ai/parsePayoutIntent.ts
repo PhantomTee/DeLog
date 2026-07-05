@@ -16,7 +16,7 @@ export interface PayoutIntentItem {
 }
 
 export type PayoutIntent =
-  | { type: "single" | "batch"; items: PayoutIntentItem[] }
+  | { type: "single" | "batch"; items: PayoutIntentItem[]; isPrivate: boolean }
   | { type: "unclear"; clarification: string }
   | { type: "not_a_payout" };
 
@@ -29,7 +29,8 @@ Rules:
 - If the message names exactly one recipient, return type "single" with exactly one item.
 - If the message is clearly not a payout request (a greeting, a question, small talk), return type "not_a_payout".
 - If it's clearly an attempted payout but missing a recipient or an amount, or the amount is ambiguous or non-numeric, return type "unclear" with a short "clarification" question.
-- Never fabricate a recipient or amount that is not present in the message. When in doubt, prefer "unclear" over guessing.`;
+- Never fabricate a recipient or amount that is not present in the message. When in doubt, prefer "unclear" over guessing.
+- Every payout is either "private" (encrypted, confidential) or "public" (a normal, transparent USDC transfer). Set "isPrivate" to false ONLY if the message explicitly asks for public/normal/transparent/non-private/visible USDC (e.g. "pay Sarah 500 publicly", "send 200 in normal USDC", "non-private transfer"). Otherwise, ALWAYS set "isPrivate" to true - private is the default when the message says nothing about visibility. One visibility applies to the whole message (all recipients), not per-recipient.`;
 
 const RESPONSE_SCHEMA = {
   name: "payout_intent",
@@ -48,6 +49,7 @@ const RESPONSE_SCHEMA = {
           required: ["recipient", "amount"],
         },
       },
+      isPrivate: { type: "boolean" },
       clarification: { type: "string" },
     },
     required: ["type"],
@@ -80,7 +82,7 @@ export async function parsePayoutIntent(message: string): Promise<PayoutIntent> 
     return { type: "unclear", clarification: "I didn't catch that - can you rephrase who to pay and how much?" };
   }
 
-  let parsed: { type?: string; items?: PayoutIntentItem[]; clarification?: string };
+  let parsed: { type?: string; items?: PayoutIntentItem[]; isPrivate?: boolean; clarification?: string };
   try {
     parsed = JSON.parse(raw);
   } catch {
@@ -92,7 +94,9 @@ export async function parsePayoutIntent(message: string): Promise<PayoutIntent> 
     return { type: "unclear", clarification: parsed.clarification ?? "Could you clarify who to pay and how much?" };
   }
   if ((parsed.type === "single" || parsed.type === "batch") && parsed.items?.length) {
-    return { type: parsed.type, items: parsed.items };
+    // Private is the safe default - only an explicit "publicly"/"normal USDC" request in the
+    // message should ever turn it off (see the isPrivate rule in SYSTEM_PROMPT).
+    return { type: parsed.type, items: parsed.items, isPrivate: parsed.isPrivate ?? true };
   }
   return { type: "unclear", clarification: "I couldn't tell who to pay and how much - can you rephrase?" };
 }

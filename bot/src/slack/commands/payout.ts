@@ -45,8 +45,22 @@ export async function openPayoutModal({
         {
           type: "input",
           block_id: "amount",
-          label: { type: "plain_text", text: "Amount (token base units)" },
+          label: { type: "plain_text", text: "Amount (USDC base units)" },
           element: { type: "plain_text_input", action_id: "amount_input" },
+        },
+        {
+          type: "input",
+          block_id: "visibility",
+          label: { type: "plain_text", text: "Visibility" },
+          element: {
+            type: "radio_buttons",
+            action_id: "visibility_input",
+            initial_option: { text: { type: "plain_text", text: "Private (encrypted)" }, value: "private" },
+            options: [
+              { text: { type: "plain_text", text: "Private (encrypted)" }, value: "private" },
+              { text: { type: "plain_text", text: "Public (normal USDC)" }, value: "public" },
+            ],
+          },
         },
       ],
     },
@@ -61,6 +75,7 @@ export async function handlePayoutSubmission({
   const { teamId, requesterId } = JSON.parse(view.private_metadata) as { teamId: string; requesterId: string };
   const recipientId = view.state.values.recipient.recipient_user.selected_user;
   const amountRaw = view.state.values.amount.amount_input.value?.trim();
+  const isPrivate = (view.state.values.visibility.visibility_input.selected_option?.value ?? "private") === "private";
 
   if (!recipientId) {
     await ack({ response_action: "errors", errors: { recipient: "Choose a recipient" } });
@@ -93,9 +108,12 @@ export async function handlePayoutSubmission({
 
   await ack();
 
-  await proposeSinglePayout(client, teamId, requesterId, treasury, {
-    slackUserId: recipientId,
-    address: recipientAddr,
-    amount,
-  });
+  await proposeSinglePayout(
+    client,
+    teamId,
+    requesterId,
+    treasury,
+    { slackUserId: recipientId, address: recipientAddr, amount },
+    isPrivate,
+  );
 }

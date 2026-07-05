@@ -1,10 +1,11 @@
 /**
  * @file setupTreasury.ts
- * @description /setup-treasury <safeAddress> <tokenAddress> - one-time per-team onboarding step.
- * Zamance cannot deploy a Safe or a confidential token on a team's behalf (that needs their own
- * gas-funded key and their own on-chain deployment decisions - see ../../../README.md), so a
- * workspace admin runs this once they've deployed ConfidentialPayoutToken and created their Safe
- * (with the bot added as a co-signing owner) themselves.
+ * @description /setup-treasury <safeAddress> - one-time per-team onboarding step. Zamance cannot
+ * deploy a Safe on a team's behalf (that needs their own gas-funded key and on-chain choices -
+ * see ../../../README.md), so a workspace admin runs this once they've created their Safe (with
+ * the bot added as a co-signing owner). Unlike the old custom-token model, there is no token
+ * address to configure: every team pays out in real Sepolia USDC plus the one globally shared
+ * ConfidentialUSDCWrapper (WRAPPER_ADDRESS env var) - both are protocol-level constants.
  */
 
 import type { SlackCommandMiddlewareArgs, AllMiddlewareArgs } from "@slack/bolt";
@@ -26,11 +27,11 @@ export async function handleSetupTreasury({
     return;
   }
 
-  const [safeAddress, tokenAddress] = command.text.trim().split(/\s+/);
-  if (!safeAddress || !tokenAddress || !ethers.isAddress(safeAddress) || !ethers.isAddress(tokenAddress)) {
+  const safeAddress = command.text.trim().split(/\s+/)[0];
+  if (!safeAddress || !ethers.isAddress(safeAddress)) {
     await respond({
       response_type: "ephemeral",
-      text: "Usage: /setup-treasury <safeAddress> <tokenAddress> - both must be valid Sepolia addresses.",
+      text: "Usage: /setup-treasury <safeAddress> - must be a valid Sepolia Safe address.",
     });
     return;
   }
@@ -55,11 +56,11 @@ export async function handleSetupTreasury({
     return;
   }
 
-  await setTeamTreasury(command.team_id, ethers.getAddress(safeAddress), ethers.getAddress(tokenAddress));
-  await logAudit(command.team_id, command.user_id, "treasury_configured", `safe=${safeAddress} token=${tokenAddress}`);
+  await setTeamTreasury(command.team_id, ethers.getAddress(safeAddress));
+  await logAudit(command.team_id, command.user_id, "treasury_configured", `safe=${safeAddress}`);
 
   await respond({
     response_type: "ephemeral",
-    text: `Treasury configured. Safe: ${safeAddress}, Token: ${tokenAddress}. Run /fund-treasury to mint encrypted supply.`,
+    text: `Treasury configured. Safe: ${safeAddress}. Payouts move real Sepolia USDC. Send the Safe some testnet USDC, then run /fund-treasury <amount> to shield part of it into the private, confidential balance before running private payouts.`,
   });
 }
