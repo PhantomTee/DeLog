@@ -24,7 +24,7 @@ services:
       - key: WRAPPER_ADDRESS
         value: "0xBF525F705d2190BF4A58B82f07DD8676c65a9e9D"
       - key: DASHBOARD_ORIGIN
-        value: https://zamance.vercel.app
+        value: https://delog.vercel.app
       - key: APPROVAL_POLL_INTERVAL_MS
         value: "30000"
       - key: SLACK_SIGNING_SECRET
