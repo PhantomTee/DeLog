@@ -9,8 +9,19 @@ import type { ParamsIncomingMessage } from "@slack/bolt/dist/receivers/ParamsInc
 import type { ServerResponse } from "node:http";
 import { verifySession, type DashboardSession } from "./jwt";
 
+/**
+ * A wildcard CORS origin in production would let any website read authenticated dashboard API
+ * responses via a victim's browser session (if a token ever leaked into a URL/log/referrer). The
+ * wildcard fallback is a local-dev convenience only - production (NODE_ENV=production, set in the
+ * Dockerfile) must have DASHBOARD_ORIGIN configured or this throws instead of silently opening up.
+ */
 function dashboardOrigin(): string {
-  return process.env.DASHBOARD_ORIGIN ?? "*";
+  const value = process.env.DASHBOARD_ORIGIN;
+  if (value) return value;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("DASHBOARD_ORIGIN must be set in production - refusing to fall back to a CORS wildcard");
+  }
+  return "*";
 }
 
 export function withCors(res: ServerResponse): void {

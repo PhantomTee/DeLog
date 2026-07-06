@@ -169,3 +169,16 @@ export async function getSafeOwners(safeAddress: string): Promise<string[]> {
   const safeReadOnly = new ethers.Contract(safeAddress, ["function getOwners() view returns (address[])"], provider);
   return safeReadOnly.getOwners();
 }
+
+/**
+ * Reads the Safe's current signature threshold. A team connecting a 1-of-N Safe with the bot as
+ * an owner would let the bot's own co-signature alone reach the threshold - defeating the entire
+ * "bot can propose but never execute alone" guarantee - so this must be checked (>= 2) before
+ * accepting a Safe address, not just that the bot is an owner.
+ */
+export async function getSafeThreshold(safeAddress: string): Promise<number> {
+  const provider = new ethers.JsonRpcProvider(requireEnv("RPC_URL"));
+  const safeReadOnly = new ethers.Contract(safeAddress, ["function getThreshold() view returns (uint256)"], provider);
+  const threshold: bigint = await safeReadOnly.getThreshold();
+  return Number(threshold);
+}

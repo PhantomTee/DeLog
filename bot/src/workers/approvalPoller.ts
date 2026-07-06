@@ -56,7 +56,13 @@ async function tryExecutePayout(
   recipientId: string,
 ): Promise<void> {
   const status = await getTransactionStatus(safeTxHash);
-  if (status.isExecuted) return;
+  if (status.isExecuted) {
+    // Someone executed it manually in Safe{Wallet} instead of waiting for this poller - sync
+    // our DB status so the row doesn't stay stuck at "awaiting_signatures" forever, and so this
+    // row stops being re-fetched by getPendingSafeTxs() every tick.
+    if (status.transactionHash) await markPayoutExecuted(payoutId, status.transactionHash);
+    return;
+  }
   if ((status.confirmations?.length ?? 0) < status.confirmationsRequired) return;
 
   const team = await getTeam(teamId);
@@ -73,7 +79,11 @@ async function tryExecutePayout(
 
 async function tryExecutePayroll(teamId: string, runId: string, safeTxHash: string, requesterId: string): Promise<void> {
   const status = await getTransactionStatus(safeTxHash);
-  if (status.isExecuted) return;
+  if (status.isExecuted) {
+    // Same manual-execution sync as tryExecutePayout, but for the whole run + all its items.
+    if (status.transactionHash) await markPayrollExecuted(runId, status.transactionHash);
+    return;
+  }
   if ((status.confirmations?.length ?? 0) < status.confirmationsRequired) return;
 
   const team = await getTeam(teamId);

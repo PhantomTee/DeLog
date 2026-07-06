@@ -111,8 +111,9 @@ export async function proposeBatchPayroll(
   isPrivate = true,
 ): Promise<void> {
   const run = await createPayrollRun(teamId, requesterId, isPrivate);
+  const pendingItems = [];
   for (const item of recipients) {
-    await createPendingPayout({
+    const payout = await createPendingPayout({
       teamId,
       requesterId,
       recipientId: item.slackUserId,
@@ -120,17 +121,26 @@ export async function proposeBatchPayroll(
       isPrivate,
       payrollRunId: run.id,
     });
+    pendingItems.push({ payoutId: payout.id, recipient: item });
   }
 
   try {
     const calls: MetaTransactionData[] = [];
-    for (const item of recipients) {
-      const { call } = await buildPayoutCall(treasury, item, isPrivate);
+    // Each item's encrypted amount handle must be persisted on its own Payout row (not just
+    // the shared safeTxHash on the run) - otherwise a payroll payout's ciphertext handle is
+    // lost the moment this function returns, unlike a single /payout's.
+    const handlesByPayoutId: Array<{ payoutId: string; amountHandle?: string }> = [];
+    for (const { payoutId, recipient } of pendingItems) {
+      const { call, amountHandle } = await buildPayoutCall(treasury, recipient, isPrivate);
       calls.push(call);
+      handlesByPayoutId.push({ payoutId, amountHandle });
     }
 
     const { safeTxHash } = await proposeSafeTransaction(treasury.safeAddress, calls);
     await attachPayrollSafeTx(run.id, safeTxHash);
+    await Promise.all(
+      handlesByPayoutId.map(({ payoutId, amountHandle }) => attachSafeTx(payoutId, safeTxHash, amountHandle)),
+    );
     await logAudit(
       teamId,
       requesterId,

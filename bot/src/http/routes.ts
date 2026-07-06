@@ -17,8 +17,8 @@ import { buildAuthorizeUrl, exchangeCodeForUserInfo } from "./slackOidc";
 import { signOAuthState, verifyOAuthState, signSession } from "./jwt";
 import { sendJson, handlePreflight, getQuery, requireSession, readJsonBody } from "./helpers";
 import { getTeam, listPayouts, listPayrollRuns, setTeamTreasury, getRegisteredOwnerSlackIds, logAudit } from "../db/repository";
-import { getBotSignerAddress, getSafeOwners, buildApproveCall, buildWrapCall, proposeSafeTransaction } from "../chain/safe";
-import { usdcInterface, wrapperInterface, getWrapperAddress } from "../chain/token";
+import { getBotSignerAddress, getSafeOwners, getSafeThreshold, buildApproveCall, buildWrapCall, proposeSafeTransaction } from "../chain/safe";
+import { usdcInterface, wrapperInterface, getUsdcAddress, getWrapperAddress } from "../chain/token";
 import { requireTeamTreasury, TREASURY_NOT_CONFIGURED_MESSAGE } from "../slack/teamConfig";
 
 function frontendUrl(path: string): string {
@@ -143,11 +143,12 @@ export const dashboardRoutes: CustomRoute[] = [
       }
 
       let owners: string[];
+      let threshold: number;
       try {
-        owners = await getSafeOwners(safeAddress);
+        [owners, threshold] = await Promise.all([getSafeOwners(safeAddress), getSafeThreshold(safeAddress)]);
       } catch (err) {
         return sendJson(res, 400, {
-          error: `Could not read owners from that Safe address: ${err instanceof Error ? err.message : String(err)}`,
+          error: `Could not read that address as a Safe on Sepolia: ${err instanceof Error ? err.message : String(err)}`,
         });
       }
 
@@ -155,6 +156,14 @@ export const dashboardRoutes: CustomRoute[] = [
       if (!owners.some((o) => o.toLowerCase() === botAddress.toLowerCase())) {
         return sendJson(res, 400, {
           error: `Zamance (${botAddress}) is not an owner of that Safe yet. Add it as a co-signing owner (threshold >= 2-of-N) first.`,
+        });
+      }
+
+      // A 1-of-N Safe would let the bot's own co-signature alone reach the threshold and
+      // execute - defeating the entire "bot can propose but never execute alone" guarantee.
+      if (threshold < 2) {
+        return sendJson(res, 400, {
+          error: `That Safe's threshold is ${threshold}-of-${owners.length}. Zamance requires threshold >= 2 so the bot can never execute alone - raise the threshold in Safe{Wallet} first.`,
         });
       }
 
@@ -201,7 +210,9 @@ export const dashboardRoutes: CustomRoute[] = [
       }
 
       const wrapperAddress = getWrapperAddress();
-      const approveCall = buildApproveCall(treasury.safeAddress, usdcInterface, wrapperAddress, amount);
+      // approve() must target the real USDC contract (not the Safe's own address) - the Safe
+      // approves the wrapper to pull USDC from it, then wrap() actually pulls it.
+      const approveCall = buildApproveCall(getUsdcAddress(), usdcInterface, wrapperAddress, amount);
       const wrapCall = buildWrapCall(wrapperAddress, wrapperInterface, treasury.safeAddress, amount);
       const { safeTxHash } = await proposeSafeTransaction(treasury.safeAddress, [approveCall, wrapCall]);
 

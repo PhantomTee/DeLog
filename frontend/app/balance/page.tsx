@@ -30,6 +30,10 @@ export default function BalancePage() {
     setBalance(null);
     setEmpty(false);
 
+    if (!WRAPPER_ADDRESS) {
+      setError("This deployment is missing NEXT_PUBLIC_WRAPPER_ADDRESS - the site owner needs to configure it.");
+      return;
+    }
     if (!instance) {
       setError(instanceError ?? "FHE runtime is still initializing - try again in a moment.");
       return;
@@ -107,7 +111,14 @@ export default function BalancePage() {
         </p>
 
         <div className="panel mt-10 rounded-2xl p-8">
-          {!address && (
+          {!WRAPPER_ADDRESS && (
+            <p className="text-sm text-red-600">
+              This deployment is missing <code>NEXT_PUBLIC_WRAPPER_ADDRESS</code> - the site owner
+              needs to configure it before this page can work.
+            </p>
+          )}
+
+          {!address && WRAPPER_ADDRESS && (
             <button
               onClick={connectAndDecrypt}
               disabled={status === "connecting" || status === "reading"}
