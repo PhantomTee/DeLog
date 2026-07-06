@@ -24,10 +24,11 @@ model Team {
   installedAt   DateTime @default(now())
   safeAddress   String?
 
-  wallets       Wallet[]
-  payouts       Payout[]
-  payrollRuns   PayrollRun[]
-  auditLogs     AuditLog[]
+  wallets         Wallet[]
+  verifiedOwners  VerifiedOwner[]
+  payouts         Payout[]
+  payrollRuns     PayrollRun[]
+  auditLogs       AuditLog[]
 }
 
 model Wallet {
@@ -37,6 +38,24 @@ model Wallet {
   slackUserId String
   ethAddress  String
   createdAt   DateTime @default(now())
+
+  @@unique([teamId, slackUserId])
+}
+
+// A Wallet row (above) is just a self-reported "send my payouts here" address - anyone can type
+// any address into /register-wallet with zero proof they control it. That's fine for receiving
+// payouts, but it must NEVER be trusted to grant the "Safe owner" authorization the dashboard's
+// fund-treasury action checks - a Slack user could otherwise register a real owner's public
+// address as their own and pass that check without ever holding the key. VerifiedOwner is only
+// written after a signature challenge (see POST /api/team/verify-owner in http/routes.ts) proves
+// the caller actually controls the private key for that address.
+model VerifiedOwner {
+  id          String   @id @default(cuid())
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  slackUserId String
+  ethAddress  String
+  verifiedAt  DateTime @default(now())
 
   @@unique([teamId, slackUserId])
 }

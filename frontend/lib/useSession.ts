@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "zamance_session_token";
 
@@ -24,10 +24,13 @@ export function useSession(): { token: string | null; clear: () => void } {
     setToken(window.localStorage.getItem(STORAGE_KEY));
   }, []);
 
-  const clear = () => {
+  // Stable across renders - callers (e.g. a dashboard's useEffect(fn, [token, clear])) would
+  // otherwise see a new function identity every render and re-run on every render, not just
+  // when the session actually changes.
+  const clear = useCallback(() => {
     window.localStorage.removeItem(STORAGE_KEY);
     setToken(null);
-  };
+  }, []);
 
   return { token, clear };
 }

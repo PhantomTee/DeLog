@@ -16,7 +16,15 @@ import { ethers } from "ethers";
 import { buildAuthorizeUrl, exchangeCodeForUserInfo } from "./slackOidc";
 import { signOAuthState, verifyOAuthState, signSession } from "./jwt";
 import { sendJson, handlePreflight, getQuery, requireSession, readJsonBody } from "./helpers";
-import { getTeam, listPayouts, listPayrollRuns, setTeamTreasury, getRegisteredOwnerSlackIds, logAudit } from "../db/repository";
+import {
+  getTeam,
+  listPayouts,
+  listPayrollRuns,
+  setTeamTreasury,
+  getVerifiedOwnerSlackIds,
+  upsertVerifiedOwner,
+  logAudit,
+} from "../db/repository";
 import { getBotSignerAddress, getSafeOwners, getSafeThreshold, buildApproveCall, buildWrapCall, proposeSafeTransaction } from "../chain/safe";
 import { usdcInterface, wrapperInterface, getUsdcAddress, getWrapperAddress } from "../chain/token";
 import { requireTeamTreasury, TREASURY_NOT_CONFIGURED_MESSAGE } from "../slack/teamConfig";
@@ -24,6 +32,16 @@ import { requireTeamTreasury, TREASURY_NOT_CONFIGURED_MESSAGE } from "../slack/t
 function frontendUrl(path: string): string {
   const base = process.env.DASHBOARD_ORIGIN ?? "http://localhost:3000";
   return `${base}${path}`;
+}
+
+/**
+ * The exact message a wallet must sign to prove ownership of `address` for POST
+ * /api/team/verify-owner. Built entirely from server-known values (session teamId/userId, the
+ * address the client claims) - never from anything else the client supplies - so the signature
+ * this recovers against can't be steered by a malicious request body.
+ */
+function buildVerifyOwnerMessage(teamId: string, userId: string, address: string): string {
+  return `Zamance: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
 }
 
 export const dashboardRoutes: CustomRoute[] = [
@@ -175,6 +193,58 @@ export const dashboardRoutes: CustomRoute[] = [
     },
   },
   {
+    path: "/api/team/verify-owner",
+    method: ["POST", "OPTIONS"],
+    handler: async (req, res) => {
+      if (req.method === "OPTIONS") return handlePreflight(res);
+      const session = requireSession(req, res);
+      if (!session) return;
+
+      const treasury = await requireTeamTreasury(session.teamId);
+      if (!treasury) return sendJson(res, 400, { error: TREASURY_NOT_CONFIGURED_MESSAGE });
+
+      let body: { address?: string; signature?: string };
+      try {
+        body = await readJsonBody(req);
+      } catch {
+        return sendJson(res, 400, { error: "Invalid request body." });
+      }
+
+      const address = body.address?.trim();
+      if (!address || !ethers.isAddress(address)) {
+        return sendJson(res, 400, { error: "address must be a valid Ethereum address." });
+      }
+      if (!body.signature) {
+        return sendJson(res, 400, { error: "signature is required." });
+      }
+
+      const checksummed = ethers.getAddress(address);
+
+      // No point verifying an address that isn't even a current Safe owner - reject early with
+      // a clear reason instead of silently accepting a signature for an irrelevant address.
+      const owners = await getSafeOwners(treasury.safeAddress);
+      if (!owners.some((o) => o.toLowerCase() === checksummed.toLowerCase())) {
+        return sendJson(res, 400, { error: "That address is not currently an owner of this team's Safe." });
+      }
+
+      const message = buildVerifyOwnerMessage(session.teamId, session.userId, checksummed);
+      let recovered: string;
+      try {
+        recovered = ethers.verifyMessage(message, body.signature);
+      } catch {
+        return sendJson(res, 400, { error: "Invalid signature." });
+      }
+      if (recovered.toLowerCase() !== checksummed.toLowerCase()) {
+        return sendJson(res, 400, { error: "Signature does not match the claimed address." });
+      }
+
+      await upsertVerifiedOwner(session.teamId, session.userId, checksummed);
+      await logAudit(session.teamId, session.userId, "owner_verified", `address=${checksummed}`);
+
+      sendJson(res, 200, { ethAddress: checksummed });
+    },
+  },
+  {
     path: "/api/team/fund",
     method: ["POST", "OPTIONS"],
     handler: async (req, res) => {
@@ -185,12 +255,15 @@ export const dashboardRoutes: CustomRoute[] = [
       const treasury = await requireTeamTreasury(session.teamId);
       if (!treasury) return sendJson(res, 400, { error: TREASURY_NOT_CONFIGURED_MESSAGE });
 
-      // Same registered-Safe-owner check /fund-treasury used to do in Slack.
+      // Signature-verified owner check - NOT the self-reported /register-wallet table. Anyone
+      // could type a real owner's address into /register-wallet without controlling its key;
+      // this grants a real capability (proposing a Safe transaction), so it must be backed by a
+      // proven signature, not a claim. See POST /api/team/verify-owner.
       const owners = await getSafeOwners(treasury.safeAddress);
-      const ownerSlackIds = await getRegisteredOwnerSlackIds(session.teamId, owners);
+      const ownerSlackIds = await getVerifiedOwnerSlackIds(session.teamId, owners);
       if (!ownerSlackIds.includes(session.userId)) {
         return sendJson(res, 403, {
-          error: "Only a registered Safe owner can fund the treasury. Register your wallet in Slack first with /register-wallet.",
+          error: "Only a verified Safe owner can fund the treasury. Verify your wallet on the dashboard first.",
         });
       }
 

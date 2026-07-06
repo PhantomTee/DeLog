@@ -141,24 +141,31 @@ with Slack"), not as Slack commands - Slack is only for running payouts.
    constants the bot already knows.
 4. Get the Safe some real Sepolia USDC (e.g. Circle's faucet at
    https://faucet.circle.com, network "Ethereum Sepolia").
-5. On the dashboard, use **Fund the confidential balance** (registered Safe
-   owners only) to shield part of that USDC into the Safe's confidential
-   balance, then sign + execute the resulting wrap transaction in
+5. Each Safe owner uses the dashboard's **Verify Safe ownership** to connect
+   their wallet and sign a message proving they actually hold the key for an
+   address that's a current Safe owner (no gas, no transaction - just a
+   signature). This is deliberately separate from `/register-wallet` (step 6):
+   registering a payout address is just "send my money here" and needs no
+   proof, but the funding action below grants a real capability, so it's
+   gated on a signature, not a self-reported claim.
+6. On the dashboard, use **Fund the confidential balance** (verified Safe
+   owners only, from step 5) to shield part of that USDC into the Safe's
+   confidential balance, then sign + execute the resulting wrap transaction in
    Safe{Wallet}. Only needed if you plan to send private payouts - public
    payouts spend the Safe's plain USDC balance directly and need no wrapping
    step.
-6. Everyone who sends or receives payouts runs `/register-wallet 0x...` once
+7. Everyone who sends or receives payouts runs `/register-wallet 0x...` once
    in Slack - including the Safe owners themselves (Zamance resolves Safe
    owner addresses back to Slack IDs via this table to know who to DM for
-   approvals, and to check who's allowed to use the dashboard's funding
-   action).
-7. From here on, payouts happen in Slack: `/payout`, `/payroll`, or DM the
+   signature-request notifications; it does not by itself grant the funding
+   capability - see step 5).
+8. From here on, payouts happen in Slack: `/payout`, `/payroll`, or DM the
    bot in natural language ("pay Sarah 500").
 
 ## Verification (end-to-end on Sepolia)
 
 1. Install via the real "Add to Slack" OAuth flow into a test workspace.
-2. Complete onboarding steps 2-7 above with two test Slack accounts.
+2. Complete onboarding steps 2-8 above with two test Slack accounts.
 3. `/payout @testuser 10` with **Private** selected - confirm all responses
    are ephemeral/DM only, never posted to a channel.
 4. Sign the proposed transaction with the second Safe owner in Safe{Wallet}.
@@ -178,11 +185,13 @@ with Slack"), not as Slack commands - Slack is only for running payouts.
 9. In a DM to the bot, try "pay @testuser 5" (should default to private) and
    "pay @testuser 5 publicly" (should go public) - confirm the confirmation
    message states the correct visibility before you click Confirm.
-10. Sign in as a non-admin, non-owner Slack member and confirm both
-    **Connect your Safe** and **Fund the confidential balance** reject the
-    request with a clear error - the dashboard enforces the same admin/owner
-    checks the old Slack commands did, just against the signed-in session
-    instead of `command.user_id`.
+10. Sign in as a non-admin Slack member and confirm **Connect your Safe**
+    rejects the request with a clear error.
+11. Have a non-owner run `/register-wallet` with a real Safe owner's address
+    (not their own), then try **Fund the confidential balance** without
+    verifying ownership - confirm it's rejected. Registering someone else's
+    address is not proof of controlling it; only **Verify Safe ownership**
+    (a signed message) grants the funding capability.
 
 ## Security notes
 

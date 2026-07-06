@@ -28,11 +28,39 @@ export async function getWalletAddress(teamId: string, slackUserId: string): Pro
   return wallet?.ethAddress ?? null;
 }
 
-/** Slack user IDs (within this team) whose registered wallet matches one of the Safe's on-chain owners. */
+/**
+ * Slack user IDs (within this team) whose SELF-REPORTED wallet matches one of the Safe's
+ * on-chain owners. Nothing here proves the caller controls that address's private key - fine
+ * for "who should we DM about a pending signature" (worst case: a wrong person gets a vague,
+ * amount-free notification), but NEVER use this to gate a real capability. See
+ * getVerifiedOwnerSlackIds for the signature-backed equivalent used by the fund-treasury action.
+ */
 export async function getRegisteredOwnerSlackIds(teamId: string, ownerAddresses: string[]): Promise<string[]> {
   const ownerSet = new Set(ownerAddresses.map((a) => a.toLowerCase()));
   const wallets = await prisma.wallet.findMany({ where: { teamId } });
   return wallets.filter((w) => ownerSet.has(w.ethAddress.toLowerCase())).map((w) => w.slackUserId);
+}
+
+/** Records that `ethAddress` signed a challenge proving key ownership, for this Slack user. */
+export async function upsertVerifiedOwner(teamId: string, slackUserId: string, ethAddress: string) {
+  return prisma.verifiedOwner.upsert({
+    where: { teamId_slackUserId: { teamId, slackUserId } },
+    update: { ethAddress, verifiedAt: new Date() },
+    create: { teamId, slackUserId, ethAddress },
+  });
+}
+
+/**
+ * Slack user IDs (within this team) who have SIGNATURE-PROVEN control of an address matching
+ * one of the Safe's current on-chain owners. This is the check that must gate any real
+ * capability (e.g. proposing a fund-treasury transaction) - unlike getRegisteredOwnerSlackIds,
+ * a row here only exists because that address's private key actually signed a challenge tied to
+ * this specific team + Slack user (see POST /api/team/verify-owner).
+ */
+export async function getVerifiedOwnerSlackIds(teamId: string, ownerAddresses: string[]): Promise<string[]> {
+  const ownerSet = new Set(ownerAddresses.map((a) => a.toLowerCase()));
+  const verified = await prisma.verifiedOwner.findMany({ where: { teamId } });
+  return verified.filter((v) => ownerSet.has(v.ethAddress.toLowerCase())).map((v) => v.slackUserId);
 }
 
 export async function createPendingPayout(params: {

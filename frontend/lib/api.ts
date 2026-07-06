@@ -75,6 +75,16 @@ async function post<T>(path: string, token: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/**
+ * Must exactly match bot/src/http/routes.ts's buildVerifyOwnerMessage - the server independently
+ * reconstructs this same string from the session + claimed address and verifies the signature
+ * against it, so drifting the format here just means the signature won't recover to the right
+ * address, not a security hole (the server never trusts a client-supplied message).
+ */
+export function buildVerifyOwnerMessage(teamId: string, userId: string, address: string): string {
+  return `Zamance: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
+}
+
 export const api = {
   me: (token: string) => get<Me>("/api/me", token),
   team: (token: string) => get<Team>("/api/team", token),
@@ -83,4 +93,6 @@ export const api = {
   connectTreasury: (token: string, safeAddress: string) =>
     post<{ safeAddress: string }>("/api/team/treasury", token, { safeAddress }),
   fundTreasury: (token: string, amount: string) => post<{ safeTxHash: string }>("/api/team/fund", token, { amount }),
+  verifyOwner: (token: string, address: string, signature: string) =>
+    post<{ ethAddress: string }>("/api/team/verify-owner", token, { address, signature }),
 };

@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { BrowserProvider } from "ethers";
 import { useSession } from "@/lib/useSession";
-import { api, ApiError, type Me, type Team, type PayoutSummary, type PayrollRunSummary } from "@/lib/api";
+import {
+  api,
+  ApiError,
+  buildVerifyOwnerMessage,
+  type Me,
+  type Team,
+  type PayoutSummary,
+  type PayrollRunSummary,
+} from "@/lib/api";
 import { AppShell } from "@/components/AppShell";
 import { SlackButton } from "@/components/SlackButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SLACK_LOGIN_URL } from "@/lib/config";
-import { Copy, Check, Link2, ShieldCheck, ArrowUpRight, Layers, Lock, Unlock, ExternalLink } from "lucide-react";
+import { Copy, Check, Link2, ShieldCheck, Wallet, ArrowUpRight, Layers, Lock, Unlock, ExternalLink } from "lucide-react";
 
 function short(addr: string | null): string {
   if (!addr) return "-";
@@ -54,7 +63,11 @@ export default function DashboardPage() {
   const [fundError, setFundError] = useState<string | null>(null);
   const [fundTxHash, setFundTxHash] = useState<string | null>(null);
 
-  function loadDashboard() {
+  const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
+
+  const loadDashboard = useCallback(() => {
     if (!token) return;
     setLoading(true);
     setError(null);
@@ -73,9 +86,9 @@ export default function DashboardPage() {
         }
       })
       .finally(() => setLoading(false));
-  }
+  }, [token, clear]);
 
-  useEffect(loadDashboard, [token, clear]);
+  useEffect(loadDashboard, [loadDashboard]);
 
   async function connectTreasury() {
     if (!token || !safeInput.trim()) return;
@@ -89,6 +102,27 @@ export default function DashboardPage() {
       setConnectError(err instanceof ApiError ? err.message : "Could not connect the treasury.");
     } finally {
       setConnecting(false);
+    }
+  }
+
+  async function verifyOwnership() {
+    if (!token || !me) return;
+    setVerifying(true);
+    setVerifyError(null);
+    try {
+      const eth = (window as unknown as { ethereum?: import("ethers").Eip1193Provider }).ethereum;
+      if (!eth) throw new Error("No wallet found - install MetaMask or another injected wallet.");
+      const provider = new BrowserProvider(eth);
+      const [address] = await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const message = buildVerifyOwnerMessage(me.teamId, me.userId, address);
+      const signature = await signer.signMessage(message);
+      const { ethAddress } = await api.verifyOwner(token, address, signature);
+      setVerifiedAddress(ethAddress);
+    } catch (err) {
+      setVerifyError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Could not verify ownership.");
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -231,9 +265,34 @@ export default function DashboardPage() {
 
         {team && team.treasuryConfigured && (
           <div className="panel mt-6 rounded-2xl p-5 sm:p-6">
+            <ActionHeader icon={<Wallet size={16} />} title="Verify Safe ownership" />
+            <p className="mt-2 text-sm text-foreground/70">
+              If you&apos;re a Safe owner, connect that wallet and sign a message to prove it - a
+              registered payout address alone isn&apos;t proof you control it, so funding requires
+              this extra step. Signing costs no gas and approves no transaction.
+            </p>
+            <button
+              onClick={verifyOwnership}
+              disabled={verifying}
+              className="mt-3 rounded-lg px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
+              style={{ background: "#7342E2" }}
+            >
+              {verifying ? "Waiting for signature..." : "Connect wallet and verify"}
+            </button>
+            {verifyError && <p className="mt-2 text-sm text-red-600">{verifyError}</p>}
+            {verifiedAddress && (
+              <p className="mt-2 text-sm text-foreground/70">
+                Verified {short(verifiedAddress)} as a Safe owner for your Slack account.
+              </p>
+            )}
+          </div>
+        )}
+
+        {team && team.treasuryConfigured && (
+          <div className="panel mt-6 rounded-2xl p-5 sm:p-6">
             <ActionHeader icon={<ShieldCheck size={16} />} title="Fund the confidential balance" />
             <p className="mt-2 text-sm text-foreground/70">
-              Registered Safe owners only. Shields this much of the Safe&apos;s real USDC into its
+              Verified Safe owners only (see above). Shields this much of the Safe&apos;s real USDC into its
               confidential balance, so private payouts have encrypted balance to draw from. The Safe
               must already hold at least this much real Sepolia USDC. A second Safe owner still has to
               sign and execute the resulting transaction in Safe{"{"}Wallet{"}"}.
