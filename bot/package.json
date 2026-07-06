@@ -1,5 +1,5 @@
 {
-  "name": "zamance-bot",
+  "name": "delog-bot",
   "version": "0.1.0",
   "private": true,
   "description": "Slack-first private payout bot backend (Sepolia + Zama FHEVM + Safe multisig)",

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { LandingPageShell } from "@/components/landing/LandingPageShell";
 
-export const metadata: Metadata = { title: "Security - Zamance" };
+export const metadata: Metadata = { title: "Security - DeLog" };
 
 const PRINCIPLES = [
   {
     title: "No single point of failure",
-    body: "Zamance is one signer on your team's Gnosis Safe, never the sole owner. It can propose a payout and co-sign, but a human owner must always add the second signature before anything executes on-chain.",
+    body: "DeLog is one signer on your team's Gnosis Safe, never the sole owner. It can propose a payout and co-sign, but a human owner must always add the second signature before anything executes on-chain.",
   },
   {
     title: "One key, many treasuries",

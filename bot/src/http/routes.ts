@@ -2,7 +2,7 @@
  * @file routes.ts
  * @description Dashboard-facing HTTP surface, mounted as Bolt customRoutes alongside the OAuth
  * install routes (see ../index.ts). Concerns here: "Sign in with Slack" (OIDC) issuing a
- * dashboard JWT, read-only JSON endpoints the Zamance frontend polls, and the two treasury
+ * dashboard JWT, read-only JSON endpoints the DeLog frontend polls, and the two treasury
  * write actions (connect a Safe, shield USDC into the confidential balance) - both of those now
  * live on the website instead of as Slack slash commands, so the same admin/owner authorization
  * checks that used to run against Slack's `command.user_id` here run against the JWT session's
@@ -41,7 +41,7 @@ function frontendUrl(path: string): string {
  * this recovers against can't be steered by a malicious request body.
  */
 function buildVerifyOwnerMessage(teamId: string, userId: string, address: string): string {
-  return `Zamance: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
+  return `DeLog: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
 }
 
 export const dashboardRoutes: CustomRoute[] = [
@@ -173,7 +173,7 @@ export const dashboardRoutes: CustomRoute[] = [
       const botAddress = getBotSignerAddress();
       if (!owners.some((o) => o.toLowerCase() === botAddress.toLowerCase())) {
         return sendJson(res, 400, {
-          error: `Zamance (${botAddress}) is not an owner of that Safe yet. Add it as a co-signing owner (threshold >= 2-of-N) first.`,
+          error: `DeLog (${botAddress}) is not an owner of that Safe yet. Add it as a co-signing owner (threshold >= 2-of-N) first.`,
         });
       }
 
@@ -181,7 +181,7 @@ export const dashboardRoutes: CustomRoute[] = [
       // execute - defeating the entire "bot can propose but never execute alone" guarantee.
       if (threshold < 2) {
         return sendJson(res, 400, {
-          error: `That Safe's threshold is ${threshold}-of-${owners.length}. Zamance requires threshold >= 2 so the bot can never execute alone - raise the threshold in Safe{Wallet} first.`,
+          error: `That Safe's threshold is ${threshold}-of-${owners.length}. DeLog requires threshold >= 2 so the bot can never execute alone - raise the threshold in Safe{Wallet} first.`,
         });
       }
 

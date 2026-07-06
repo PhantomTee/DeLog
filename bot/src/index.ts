@@ -1,6 +1,6 @@
 /**
  * @file index.ts
- * @description Zamance Slack Bolt app bootstrap. Socket Mode handles events/commands for every
+ * @description DeLog Slack Bolt app bootstrap. Socket Mode handles events/commands for every
  * installed workspace over one WebSocket connection (no public events endpoint needed); a small
  * HTTP server (spun up by SocketModeReceiver whenever OAuth options are present) serves the
  * install/OAuth-redirect routes plus the dashboard API in ./http/routes.ts.
@@ -66,7 +66,7 @@ app.action(CANCEL_ACTION_ID, handleNlPayoutCancel);
 
 async function main() {
   await app.start();
-  console.log("[bot] Zamance running in Socket Mode; OAuth + dashboard API on port", process.env.PORT ?? 3001);
+  console.log("[bot] DeLog running in Socket Mode; OAuth + dashboard API on port", process.env.PORT ?? 3001);
 
   const stopPoller = startApprovalPoller();
   process.on("SIGTERM", () => {

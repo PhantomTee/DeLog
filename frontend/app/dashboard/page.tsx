@@ -81,7 +81,7 @@ export default function DashboardPage() {
         if (err instanceof ApiError && err.status === 401) {
           clear();
         } else {
-          setError("Could not reach the Zamance API. Is the bot backend running?");
+          setError("Could not reach the DeLog API. Is the bot backend running?");
         }
       })
       .finally(() => setLoading(false));
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="mt-6 border-t border-border pt-6">
-              <p className="text-xs uppercase tracking-widest text-foreground/50">Zamance bot signer address</p>
+              <p className="text-xs uppercase tracking-widest text-foreground/50">DeLog bot signer address</p>
               <p className="mt-2 text-sm text-foreground/60">
                 Add this address as a co-signing owner on your Safe (threshold 2-of-N or higher) before
                 connecting it below.

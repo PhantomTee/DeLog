@@ -81,7 +81,7 @@ export function Hero() {
           className="text-center"
           style={{ marginTop: 14, fontSize: "0.8rem", color: "var(--color-text)", opacity: 0.55 }}
         >
-          New to Zamance? Signing in installs it to your workspace automatically.
+          New to DeLog? Signing in installs it to your workspace automatically.
         </p>
       </div>
     </section>

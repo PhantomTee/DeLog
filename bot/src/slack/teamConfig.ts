@@ -22,4 +22,4 @@ export async function requireTeamTreasury(teamId: string): Promise<TeamTreasury 
 }
 
 export const TREASURY_NOT_CONFIGURED_MESSAGE =
-  "This workspace hasn't connected a treasury yet. An admin needs to sign in to the Zamance dashboard and connect a Safe first.";
+  "This workspace hasn't connected a treasury yet. An admin needs to sign in to the DeLog dashboard and connect a Safe first.";

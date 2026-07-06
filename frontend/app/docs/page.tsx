@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPageShell } from "@/components/landing/LandingPageShell";
 
-export const metadata: Metadata = { title: "Docs - Zamance" };
+export const metadata: Metadata = { title: "Docs - DeLog" };
 
 const COMMANDS = [
   { cmd: "/register-wallet <address>", body: "Registers your Sepolia payout address. Everyone who sends or receives a payout runs this once, including Safe owners." },
@@ -11,8 +11,8 @@ const COMMANDS = [
 ];
 
 const STEPS = [
-  { title: "Sign in with Slack", body: "Installs automatically on first sign-in if your workspace hasn't added Zamance yet - each workspace gets its own isolated data." },
-  { title: "Create a Safe", body: "At app.safe.global - add Zamance's bot signer address (shown on the dashboard) as an owner, threshold >= 2-of-N." },
+  { title: "Sign in with Slack", body: "Installs automatically on first sign-in if your workspace hasn't added DeLog yet - each workspace gets its own isolated data." },
+  { title: "Create a Safe", body: "At app.safe.global - add DeLog's bot signer address (shown on the dashboard) as an owner, threshold >= 2-of-N." },
   { title: "Connect it", body: "Sign in to the dashboard and connect your Safe address there - admin only, nothing to deploy." },
   { title: "Get testnet USDC", body: "Send the Safe some real Sepolia USDC, e.g. from Circle's faucet." },
   { title: "Shield and pay", body: "From the dashboard, shield part of it for private payouts. Then use /payout or /payroll in Slack - toggle Private or Public per run." },
@@ -25,7 +25,7 @@ export default function DocsPage() {
         Docs
       </h1>
       <p className="mt-4 opacity-70">
-        Zamance is self-hosted per workspace right now - there's no shared multi-team backend to
+        DeLog is self-hosted per workspace right now - there's no shared multi-team backend to
         sign up for beyond installing the Slack app. The full setup guide (running the bot
         backend, the Slack app manifest, Hardhat deployment) lives in the repo README; this page
         covers the parts relevant once it's already running.

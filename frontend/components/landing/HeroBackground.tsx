@@ -1,7 +1,7 @@
 /**
  * Demo placeholder from the original design spec - this footage belongs to
  * a different, unrelated product. Fine for a demo per explicit direction;
- * swap for a real Zamance-branded clip before any real launch by setting
+ * swap for a real DeLog-branded clip before any real launch by setting
  * NEXT_PUBLIC_HERO_VIDEO_URL, which overrides this default.
  */
 const DEMO_VIDEO_URL =

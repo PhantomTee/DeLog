@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = "zamance_session_token";
+const STORAGE_KEY = "delog_session_token";
 
 /**
  * Reads a `#token=...` fragment left by the bot backend's OIDC callback redirect (fragments

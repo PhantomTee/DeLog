@@ -1,5 +1,5 @@
 {
-  "name": "zamance-contracts",
+  "name": "delog-contracts",
   "version": "0.1.0",
   "private": true,
   "description": "Confidential payout token (ERC-7984 / FHEVM v0.11) for the Slack payout bot",

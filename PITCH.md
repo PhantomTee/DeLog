@@ -1,4 +1,4 @@
-# Zamance - 3 Minute Pitch Script
+# DeLog - 3 Minute Pitch Script
 
 Read this like you're explaining it to a teammate, not reciting it. Cut anything that
 doesn't sound like you. Timings assume ~150 wpm - adjust pacing to fit exactly 3:00.
@@ -10,13 +10,13 @@ doesn't sound like you. Timings assume ~150 wpm - adjust pacing to fit exactly 3
 "Every team that pays people through Slack has the same problem: the moment you type
 an amount into a channel or even a DM, it's sitting in plaintext forever - in Slack's
 servers, in everyone's search history, in a screenshot someone takes by accident.
-Zamance fixes that. It's a Slack bot that pays your team in real USDC on Ethereum,
+DeLog fixes that. It's a Slack bot that pays your team in real USDC on Ethereum,
 and the amount can be fully encrypted end to end, using Zama's FHEVM."
 
 ### 0:20-0:50 - What it is
 
 "Here's how it works. Your team connects a Gnosis Safe - a multisig wallet - and
-Zamance becomes one signer on it, never the only one. So the bot can *propose* a
+DeLog becomes one signer on it, never the only one. So the bot can *propose* a
 payout, but a human always has to co-sign before anything moves. Then, for the
 actual transfer: you choose, per payout, whether it's public - a normal transparent
 USDC transfer - or private, where the amount is encrypted using a confidential
@@ -32,7 +32,7 @@ DM, ever shows a public channel message with the amount.
 
 [Show Safe{Wallet} - a second owner signing]
 
-A second Safe owner signs it here. Zamance's approval worker picks that up and
+A second Safe owner signs it here. DeLog's approval worker picks that up and
 executes automatically.
 
 [Show dashboard]
@@ -54,12 +54,12 @@ Circle's actual Sepolia USDC - so wrapping it into a private balance and paying 
 of it is the same mechanic you'd use with real money, not a toy internal token.
 It's deployed and verified on Sepolia Etherscan, built on `@fhevm/solidity` v0.11
 and OpenZeppelin's confidential-contracts library. Every encrypted value has an ACL
-- so only the right people can ever decrypt it - and the multisig means Zamance,
+- so only the right people can ever decrypt it - and the multisig means DeLog,
 the bot, can never move funds by itself, ever."
 
 ### 2:30-3:00 - Close
 
-"Zamance is fully open source, deployed and working right now on Sepolia - Slack
+"DeLog is fully open source, deployed and working right now on Sepolia - Slack
 bot, smart contracts, and a live dashboard. If you run a team and you've ever
 winced at typing a salary into Slack, this is what that should have looked like
 from day one. Thanks for watching."
@@ -72,7 +72,7 @@ from day one. Thanks for watching."
 Every Slack payroll bot has the same flaw: the amount is sitting in plaintext the
 moment you type it.
 
-Zamance fixes that - private team payouts on Slack, encrypted end-to-end with
+DeLog fixes that - private team payouts on Slack, encrypted end-to-end with
 @zama_fhe's FHEVM. Built for the Zama Developer Program.
 
 🧵
@@ -85,13 +85,13 @@ Sepolia USDC).
 Same real money. Your choice of visibility, per payout.
 
 **Tweet 3 (custody)**
-Zamance never holds your funds alone. It's one signer on your team's Gnosis Safe
+DeLog never holds your funds alone. It's one signer on your team's Gnosis Safe
 multisig - it can *propose* a payout, but a human always has to co-sign before
 anything executes.
 
 **Tweet 4 (the demo hook)**
 You don't need to install anything to see the core mechanic: connect any wallet at
-[zamance.vercel.app/balance] and decrypt your own confidential USDC balance, live,
+[delog.vercel.app/balance] and decrypt your own confidential USDC balance, live,
 via Zama's relayer SDK - entirely in your browser.
 
 **Tweet 5 (tech stack)**

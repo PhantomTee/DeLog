@@ -19,12 +19,12 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { title: "Sign in with Slack", body: "Installs automatically if your workspace hasn't added Zamance yet - one continuous flow, each workspace fully isolated." },
+  { title: "Sign in with Slack", body: "Installs automatically if your workspace hasn't added DeLog yet - one continuous flow, each workspace fully isolated." },
   {
     title: "Connect your treasury",
-    body: "Create a Safe, add Zamance as a co-signing owner, then connect it from the dashboard - no token to deploy, Zamance pays out in real Sepolia USDC.",
+    body: "Create a Safe, add DeLog as a co-signing owner, then connect it from the dashboard - no token to deploy, DeLog pays out in real Sepolia USDC.",
   },
-  { title: "Pay your team", body: "Use /payout or /payroll from Slack, toggling Private or Public. A second Safe owner signs, Zamance executes and DMs both sides." },
+  { title: "Pay your team", body: "Use /payout or /payroll from Slack, toggling Private or Public. A second Safe owner signs, DeLog executes and DMs both sides." },
 ];
 
 export default function Home() {
@@ -72,7 +72,7 @@ export default function Home() {
           No single point of failure
         </h2>
         <p className="mt-4 max-w-2xl text-sm opacity-70">
-          Zamance is one signer on your team&apos;s Gnosis Safe. It can propose a payout and
+          DeLog is one signer on your team&apos;s Gnosis Safe. It can propose a payout and
           co-sign, but a human owner must always add the second signature before anything
           executes - the bot alone can never move funds.
         </p>

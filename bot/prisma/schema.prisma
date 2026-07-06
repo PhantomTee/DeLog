@@ -7,10 +7,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// One row per Slack workspace that has installed Zamance. Doubles as the Slack Bolt
+// One row per Slack workspace that has installed DeLog. Doubles as the Slack Bolt
 // InstallationStore backing table (see src/slack/installationStore.ts) and as the per-team
 // treasury config. safeAddress is nullable because a team must connect a Safe from the
-// dashboard after installing - Zamance cannot auto-deploy a Safe for them (that requires their
+// dashboard after installing - DeLog cannot auto-deploy a Safe for them (that requires their
 // own gas-funded key and their own on-chain deployment choices). There is deliberately no
 // tokenAddress column:
 // every team pays out in real Sepolia USDC plus one globally shared ConfidentialUSDCWrapper

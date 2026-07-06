@@ -3,7 +3,7 @@
  * @description Prisma-backed Slack InstallationStore. Each installed workspace becomes one Team
  * row; Bolt resolves the right bot token per incoming event automatically once this is wired
  * into the App's `installationStore` option - no custom `authorize` function needed. Enterprise
- * Grid (org-wide) installs are intentionally unsupported for now (Zamance targets a single team's
+ * Grid (org-wide) installs are intentionally unsupported for now (DeLog targets a single team's
  * treasury; org-wide install semantics would need a different data model).
  */
 
@@ -13,7 +13,7 @@ import { prisma } from "../db/client";
 export const prismaInstallationStore: InstallationStore = {
   async storeInstallation(installation: Installation<"v1" | "v2", boolean>) {
     if (installation.isEnterpriseInstall || !installation.team?.id) {
-      throw new Error("Zamance does not support Enterprise Grid org-wide installs");
+      throw new Error("DeLog does not support Enterprise Grid org-wide installs");
     }
     if (!installation.bot?.token) {
       throw new Error("Installation is missing a bot token");
@@ -39,7 +39,7 @@ export const prismaInstallationStore: InstallationStore = {
 
   async fetchInstallation(query: InstallationQuery<boolean>) {
     if (query.isEnterpriseInstall || !query.teamId) {
-      throw new Error("Zamance does not support Enterprise Grid org-wide installs");
+      throw new Error("DeLog does not support Enterprise Grid org-wide installs");
     }
     const team = await prisma.team.findUnique({ where: { id: query.teamId } });
     if (!team) throw new Error(`No installation found for team ${query.teamId}`);

@@ -9,7 +9,7 @@
   --font-heading: "Helvetica Now Display Bold", sans-serif;
   --font-body: "Inter", sans-serif;
   /* Addresses, tx hashes, and other data readouts - a deliberate ledger/statement feel instead
-     of the system monospace fallback, matched to Zamance's "here's proof, not just a promise"
+     of the system monospace fallback, matched to DeLog's "here's proof, not just a promise"
      positioning around encrypted amounts. */
   --font-data: "IBM Plex Mono", ui-monospace, monospace;
 

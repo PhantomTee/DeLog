@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LandingPageShell } from "@/components/landing/LandingPageShell";
 
-export const metadata: Metadata = { title: "Support - Zamance" };
+export const metadata: Metadata = { title: "Support - DeLog" };
 
 const FAQ = [
   {
@@ -14,10 +14,10 @@ const FAQ = [
   },
   {
     q: "A payout is stuck on \"awaiting_signatures\"",
-    a: "A second Safe owner needs to sign the proposed transaction in Safe{Wallet}. Zamance never executes with only its own signature.",
+    a: "A second Safe owner needs to sign the proposed transaction in Safe{Wallet}. DeLog never executes with only its own signature.",
   },
   {
-    q: "The dashboard shows \"Could not reach the Zamance API\"",
+    q: "The dashboard shows \"Could not reach the DeLog API\"",
     a: "The bot backend isn't reachable at the configured URL - check NEXT_PUBLIC_BOT_API_URL and that the backend is running.",
   },
 ];
@@ -29,7 +29,7 @@ export default function SupportPage() {
         Support
       </h1>
       <p className="mt-4 opacity-70">
-        Zamance is open source. For bugs or feature requests, open an issue on GitHub. For
+        DeLog is open source. For bugs or feature requests, open an issue on GitHub. For
         anything sensitive - a security concern, or a question involving your workspace&apos;s
         data - reach out privately instead of posting publicly.
       </p>
@@ -43,11 +43,11 @@ export default function SupportPage() {
           Open a GitHub issue
         </a>
         <a
-          href="mailto:support@zamance.app"
+          href="mailto:support@delog.app"
           className="rounded-full px-5 py-2.5 text-sm font-semibold"
           style={{ background: "var(--color-login-bg)", color: "var(--color-text)" }}
         >
-          Email support@zamance.app
+          Email support@delog.app
         </a>
       </div>
 

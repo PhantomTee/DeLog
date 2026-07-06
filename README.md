@@ -1,6 +1,6 @@
-# Zamance
+# DeLog
 
-**Live:** https://zamance.vercel.app (frontend only for now - see "Run the bot
+**Live:** https://delog.vercel.app (frontend only for now - see "Run the bot
 backend" below; the dashboard needs a deployed `bot/` host to be functional).
 
 **Deployed contracts (Sepolia, verified on Etherscan):**
@@ -13,12 +13,12 @@ Discord bots). Every payout has a public/private toggle (private by
 default): private payouts move an encrypted amount via a Zama FHEVM
 confidential ERC-7984 wrapper around USDC (`ConfidentialUSDCWrapper`),
 public payouts are a plain, transparent USDC transfer. Custody sits in each
-team's own Gnosis Safe multisig, where Zamance is one signer among several -
+team's own Gnosis Safe multisig, where DeLog is one signer among several -
 the bot alone can never move funds.
 
-Zamance is multi-tenant: any Slack workspace can install it via OAuth
+DeLog is multi-tenant: any Slack workspace can install it via OAuth
 ("Add to Slack"), and each installation is fully isolated - its own DB rows,
-its own treasury (just a Safe), its own dashboard login. Zamance does not
+its own treasury (just a Safe), its own dashboard login. DeLog does not
 (and cannot) deploy a Safe on a team's behalf; a team admin creates their own
 Safe and connects it from the **dashboard**, not Slack - treasury setup and
 funding are website actions (`POST /api/team/treasury`, `POST /api/team/fund`),
@@ -44,10 +44,10 @@ Manifest (Settings -> App Manifest):
 
 ```yaml
 display_information:
-  name: Zamance
+  name: DeLog
 features:
   bot_user:
-    display_name: zamance
+    display_name: delog
     always_online: true
   slash_commands:
     - command: /register-wallet
@@ -129,8 +129,8 @@ npm run dev
 Treasury setup and funding happen on the **dashboard** (signed in via "Sign in
 with Slack"), not as Slack commands - Slack is only for running payouts.
 
-1. Click **Add to Slack** on the Zamance site (real OAuth install).
-2. Sign in to the dashboard. It shows Zamance's bot signer address (with a
+1. Click **Add to Slack** on the DeLog site (real OAuth install).
+2. Sign in to the dashboard. It shows DeLog's bot signer address (with a
    copy button) - create a Safe at https://app.safe.global (Sepolia) and add
    that address as an owner, threshold >= 2-of-N.
 3. Back on the dashboard, paste the Safe address into **Connect your Safe**
@@ -155,7 +155,7 @@ with Slack"), not as Slack commands - Slack is only for running payouts.
    payouts spend the Safe's plain USDC balance directly and need no wrapping
    step.
 7. Everyone who sends or receives payouts runs `/register-wallet 0x...` once
-   in Slack - including the Safe owners themselves (Zamance resolves Safe
+   in Slack - including the Safe owners themselves (DeLog resolves Safe
    owner addresses back to Slack IDs via this table to know who to DM for
    signature-request notifications; it does not by itself grant the funding
    capability - see step 5).

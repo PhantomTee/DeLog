@@ -20,7 +20,7 @@ export type PayoutIntent =
   | { type: "unclear"; clarification: string }
   | { type: "not_a_payout" };
 
-const SYSTEM_PROMPT = `You extract payout requests from a Slack direct message sent to a payroll bot called Zamance.
+const SYSTEM_PROMPT = `You extract payout requests from a Slack direct message sent to a payroll bot called DeLog.
 
 Rules:
 - "recipient" must be copied EXACTLY as written in the message: a Slack mention like <@U123ABC>, or a bare name like "Sarah". Never invent, guess, or normalize a Slack ID - you do not have access to the team's member list.

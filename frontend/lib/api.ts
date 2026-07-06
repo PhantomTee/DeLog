@@ -44,7 +44,7 @@ export class ApiError extends Error {
     public status: number,
     message?: string,
   ) {
-    super(message ?? `Zamance API request failed with status ${status}`);
+    super(message ?? `DeLog API request failed with status ${status}`);
   }
 }
 
@@ -82,7 +82,7 @@ async function post<T>(path: string, token: string, body: unknown): Promise<T> {
  * address, not a security hole (the server never trusts a client-supplied message).
  */
 export function buildVerifyOwnerMessage(teamId: string, userId: string, address: string): string {
-  return `Zamance: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
+  return `DeLog: verify Safe ownership\nTeam: ${teamId}\nSlack user: ${userId}\nAddress: ${address}`;
 }
 
 export const api = {

@@ -17,7 +17,7 @@ type Status = "idle" | "connecting" | "reading" | "signing" | "decrypting" | "do
 /**
  * Public demo page - connect any Sepolia wallet and decrypt YOUR OWN confidential USDC balance
  * from the shared ConfidentialUSDCWrapper, entirely client-side. Every other FHE operation in
- * Zamance happens server-side inside the Slack bot (see bot/src/chain/fheEncrypt.ts); this page
+ * DeLog happens server-side inside the Slack bot (see bot/src/chain/fheEncrypt.ts); this page
  * exists so the encrypt/decrypt step is visible and triable in a browser without needing Slack,
  * a Safe, or an install - useful for demoing the core Zama FHEVM mechanic on its own.
  */
@@ -108,7 +108,7 @@ export default function BalancePage() {
       <main className="mx-auto max-w-2xl flex-1 px-6 py-20 text-center">
         <h1 className="text-3xl font-semibold tracking-tight">Decrypt your confidential balance</h1>
         <p className="mt-4 text-foreground/70">
-          Connect a Sepolia wallet and decrypt your own encrypted USDC balance from Zamance&apos;s
+          Connect a Sepolia wallet and decrypt your own encrypted USDC balance from DeLog&apos;s
           shared confidential wrapper - entirely in your browser, via Zama&apos;s FHE relayer. This
           is the same confidential balance a private <code>/payout</code> moves; nothing here goes
           through Slack.

@@ -1,12 +1,12 @@
 {
   "display_information": {
-    "name": "Zamance",
+    "name": "DeLog",
     "description": "Private team payouts on Ethereum Sepolia, encrypted with Zama FHEVM",
     "background_color": "#7342e2"
   },
   "features": {
     "bot_user": {
-      "display_name": "zamance",
+      "display_name": "delog",
       "always_online": true
     },
     "slash_commands": [

@@ -3,9 +3,9 @@ import "./globals.css";
 import { SiteBackground } from "@/components/SiteBackground";
 
 export const metadata: Metadata = {
-  title: "Zamance - Private team payouts for Slack",
+  title: "DeLog - Private team payouts for Slack",
   description:
-    "Zamance processes team payments on Slack with encrypted amounts (Zama FHEVM) and Gnosis Safe multisig custody on Ethereum Sepolia.",
+    "DeLog processes team payments on Slack with encrypted amounts (Zama FHEVM) and Gnosis Safe multisig custody on Ethereum Sepolia.",
 };
 
 export default function RootLayout({
