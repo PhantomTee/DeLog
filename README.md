@@ -3,6 +3,10 @@
 **Live:** https://zamance.vercel.app (frontend only for now - see "Run the bot
 backend" below; the dashboard needs a deployed `bot/` host to be functional).
 
+**Deployed contracts (Sepolia, verified on Etherscan):**
+- [`ConfidentialUSDCWrapper`](https://sepolia.etherscan.io/address/0xBF525F705d2190BF4A58B82f07DD8676c65a9e9D#code) - `0xBF525F705d2190BF4A58B82f07DD8676c65a9e9D`, wraps Circle's real Sepolia USDC (`0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`) into a confidential ERC-7984 balance
+- [`ConfidentialPayoutToken`](https://sepolia.etherscan.io/address/0x0E9885Ab2BaE630ff57Aa8a1D547D7067f81eA0F#code) - `0x0E9885Ab2BaE630ff57Aa8a1D547D7067f81eA0F`, the original standalone confidential token
+
 A Slack-first bot for processing team payments on Ethereum Sepolia in real
 Circle USDC, with a public dashboard (like the bot dashboards you'd see for
 Discord bots). Every payout has a public/private toggle (private by
