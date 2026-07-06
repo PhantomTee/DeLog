@@ -6,7 +6,15 @@ import { Logo } from "@/components/Logo";
 import { NAV_LINKS } from "./navLinks";
 import { SLACK_INSTALL_URL, SLACK_LOGIN_URL } from "@/lib/config";
 
-export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileMenu({
+  open,
+  onClose,
+  isSignedIn,
+}: {
+  open: boolean;
+  onClose: () => void;
+  isSignedIn: boolean;
+}) {
   return (
     <AnimatePresence>
       {open && (
@@ -78,11 +86,11 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
                 Add to Slack
               </a>
               <a
-                href={SLACK_LOGIN_URL}
+                href={isSignedIn ? "/dashboard" : SLACK_LOGIN_URL}
                 className="rounded-full py-3.5 text-center font-semibold"
                 style={{ background: "var(--color-login-bg)", color: "var(--color-text)", fontSize: "0.95rem" }}
               >
-                Sign In
+                {isSignedIn ? "Dashboard" : "Sign In"}
               </a>
             </div>
           </motion.div>

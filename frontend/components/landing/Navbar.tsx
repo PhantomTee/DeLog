@@ -6,9 +6,12 @@ import { Logo } from "@/components/Logo";
 import { MobileMenu } from "./MobileMenu";
 import { NAV_LINKS } from "./navLinks";
 import { SLACK_INSTALL_URL, SLACK_LOGIN_URL } from "@/lib/config";
+import { useSession } from "@/lib/useSession";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { token } = useSession();
+  const isSignedIn = Boolean(token);
 
   return (
     <>
@@ -40,11 +43,11 @@ export function Navbar() {
               Add to Slack
             </a>
             <a
-              href={SLACK_LOGIN_URL}
+              href={isSignedIn ? "/dashboard" : SLACK_LOGIN_URL}
               className="rounded-full px-5 py-2.5 text-sm font-semibold transition hover:shadow-lg active:scale-95"
               style={{ background: "var(--color-login-bg)", color: "var(--color-text)" }}
             >
-              Sign In
+              {isSignedIn ? "Dashboard" : "Sign In"}
             </a>
           </div>
 
@@ -58,7 +61,7 @@ export function Navbar() {
         </div>
       </header>
 
-      <MobileMenu open={open} onClose={() => setOpen(false)} />
+      <MobileMenu open={open} onClose={() => setOpen(false)} isSignedIn={isSignedIn} />
     </>
   );
 }
