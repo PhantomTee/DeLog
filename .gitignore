@@ -27,3 +27,6 @@ skills-lock.json
 # Misc
 *.log
 .DS_Store
+
+.vercel
+.env*
