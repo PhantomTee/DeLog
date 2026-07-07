@@ -15,7 +15,7 @@ export function Navbar() {
   return (
     <>
       <header className="relative z-10" style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
+        <div className="flex items-center justify-between gap-8 px-5 py-4 sm:px-8 sm:py-5">
           <a href="/" aria-label="DeLog home">
             <Logo />
           </a>
