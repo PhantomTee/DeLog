@@ -1,6 +1,6 @@
 # DeLog
 
-**Live:** https://delog.vercel.app (frontend only for now - see "Run the bot
+**Live:** https://delog-app.vercel.app (frontend only for now - see "Run the bot
 backend" below; the dashboard needs a deployed `bot/` host to be functional).
 
 **Deployed contracts (Sepolia, verified on Etherscan):**

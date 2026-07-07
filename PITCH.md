@@ -91,7 +91,7 @@ anything executes.
 
 **Tweet 4 (the demo hook)**
 You don't need to install anything to see the core mechanic: connect any wallet at
-[delog.vercel.app/balance] and decrypt your own confidential USDC balance, live,
+[delog-app.vercel.app/balance] and decrypt your own confidential USDC balance, live,
 via Zama's relayer SDK - entirely in your browser.
 
 **Tweet 5 (tech stack)**
