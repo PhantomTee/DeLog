@@ -15,7 +15,7 @@ import { WebClient } from "@slack/web-api";
 import { ethers } from "ethers";
 import { buildAuthorizeUrl, exchangeCodeForUserInfo } from "./slackOidc";
 import { signOAuthState, verifyOAuthState, signSession } from "./jwt";
-import { sendJson, handlePreflight, getQuery, requireSession, readJsonBody } from "./helpers";
+import { sendJson, handlePreflight, withCors, getQuery, requireSession, readJsonBody } from "./helpers";
 import {
   getTeam,
   listPayouts,
@@ -49,8 +49,13 @@ function buildVerifyOwnerMessage(teamId: string, userId: string, address: string
 export const dashboardRoutes: CustomRoute[] = [
   {
     path: "/healthz",
-    method: "GET",
-    handler: (_req, res) => {
+    method: ["GET", "OPTIONS"],
+    handler: (req, res) => {
+      if (req.method === "OPTIONS") return handlePreflight(res);
+      // The /connecting page polls this cross-origin from the browser while the Render free-tier
+      // instance wakes up - without CORS headers, fetch() never resolves even though the request
+      // reaches the server and returns 200 (the browser blocks reading the response).
+      withCors(res);
       res.writeHead(200, { "content-type": "text/plain" });
       res.end("ok");
     },
