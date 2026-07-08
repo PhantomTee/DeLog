@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { BrowserProvider } from "ethers";
+import { BrowserProvider, getAddress } from "ethers";
 import { useSession } from "@/lib/useSession";
 import {
   api,
@@ -115,7 +115,10 @@ export default function DashboardPage() {
       const eth = (window as unknown as { ethereum?: import("ethers").Eip1193Provider }).ethereum;
       if (!eth) throw new Error("No wallet found - install MetaMask or another injected wallet.");
       const provider = new BrowserProvider(eth);
-      const [address] = await provider.send("eth_requestAccounts", []);
+      const [rawAddress] = await provider.send("eth_requestAccounts", []);
+      // Must match the server's checksummed address byte-for-byte, or the reconstructed message
+      // differs and ethers.verifyMessage recovers the wrong signer even with a correct signature.
+      const address = getAddress(rawAddress);
       const signer = await provider.getSigner();
       const message = buildVerifyOwnerMessage(me.teamId, me.userId, address);
       const signature = await signer.signMessage(message);
